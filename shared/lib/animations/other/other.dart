@@ -1,0 +1,1 @@
+export 'kinetic_text/kinetic_text.dart';
