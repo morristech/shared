@@ -1,6 +1,5 @@
 export 'curves.dart';
 export 'implicit/implicit.dart';
-export 'other/other.dart';
 export 'transitions/transitions.dart';
 export 'translate.dart';
 

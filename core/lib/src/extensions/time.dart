@@ -27,6 +27,10 @@ extension DateTimeExtions on DateTime {
       DateTime.now().subtract(const Duration(days: 1)).dateId == dateId;
   bool get isThisWeek => DateTime.now().weekId == weekId;
 
+  bool isBetween(DateTime start, DateTime end) {
+    return isAtSameMomentAs(start) || isAtSameMomentAs(end) || (start.isBefore(this) && end.isAfter(this));
+  }
+
   int get dayOfYear => difference(DateTime(year)).inDays;
   int get week {
     final dayOfYear = int.parse(format('D'));

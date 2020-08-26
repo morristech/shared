@@ -42,7 +42,6 @@ class CircleButton extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       child: Box(
         padding: padding,
-        alignment: Alignment.center,
         boxShape: BoxShape.circle,
         onTap: active ? onTap : null,
         child: Container(
