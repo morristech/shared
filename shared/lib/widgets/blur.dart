@@ -26,7 +26,8 @@ class Blur extends StatelessWidget {
       return blur;
     } else {
       return Stack(
-        children: [child, blur],
+        alignment: Alignment.center,
+        children: [blur, child],
       );
     }
   }

@@ -1,4 +1,5 @@
 export 'animated_color.dart';
+export 'animated_fade.dart';
 export 'animated_indexed_stack.dart';
 export 'animated_rotation.dart';
 export 'animated_scale.dart';

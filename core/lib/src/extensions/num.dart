@@ -57,6 +57,8 @@ extension IntExtensions on int {
 }
 
 extension DoubleExtensions on double {
+  double get half => this / 2.0;
+  
   double roundToPrecision(double precision) {
     final mod = math.pow(10.0, precision);
     return (this * mod).round().toDouble() / mod;

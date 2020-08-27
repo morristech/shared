@@ -21,6 +21,8 @@ extension IterableExtension<T> on Iterable<T> {
     }
   }
 
+  int get lastIndex => length - 1;
+
   List<E> mapWithIndex<E>(E Function(T item, int index) mapper) {
     var i = 0;
     return map((e) => mapper(e, i++)).toList();
