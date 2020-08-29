@@ -86,6 +86,7 @@ class I18n {
   /// of the app.
   static String of(String input) {
     String translationKey;
+
     final keys = defaultTranslations.keys.toList();
     final values = defaultTranslations.values.toList();
     for (var i = 0; i < keys.length; i++) {
@@ -108,14 +109,17 @@ class I18n {
         // the value in the else group.
         //
         // This way, an input of {10 Hours} would match the above translation.
-        if (rawTranslation.isEmpty) {
-          final placeholder = Placeholder.match(input);
+        if (rawInput.trim().isEmpty && rawTranslation.trim().isEmpty) {
+          final placeholder = Placeholder.match(translation);
           if (placeholder != null && placeholder.orElse != null) {
-            final srcHasMatchWithPlaceholder = rawInput.split(' ').includes(
-                  (item) => item == placeholder.orElse,
-                );
+            final orElseValue = placeholder.orElse.replaceAll('\$i', '').removeWhitespace;
+            final inputPlaceholders = placeholderRegex.allMatches(input);
 
-            if (srcHasMatchWithPlaceholder) {
+            final hasMatch = inputPlaceholders.any(
+              (match) => match.group(0).contains(orElseValue),
+            );
+
+            if (hasMatch) {
               translationKey = key;
               break;
             }

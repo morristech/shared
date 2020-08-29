@@ -78,7 +78,10 @@ class Box extends StatelessWidget {
     this.curve = Curves.linear,
     this.constraints,
     this.showInkWell = true,
-  })  : assert(color == null || color is Color || color is SimpleGradient || color is Gradient),
+  })  : assert(color == null ||
+            color is Color ||
+            color is SimpleGradient ||
+            color is Gradient),
         assert(borderRadius != null),
         super(key: key);
 
@@ -89,14 +92,17 @@ class Box extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     final r = radius != null ? radius * 2 : null;
     final h = (r ?? height)?.toDouble();
-    final w = (r ?? (h != null && width == null ? double.infinity : width))?.toDouble();
+    final w = (r ?? (h != null && width != WRAP ? double.infinity : width))?.toDouble();
 
     final BorderRadius br = borderRadius is BorderRadius
         ? borderRadius
         : BorderRadius.circular(
-            !circle ? borderRadius?.toDouble() : w != null ? w / 2.0 : h != null ? h / 2.0 : 0.0,
+            !circle
+                ? borderRadius?.toDouble() ?? 0.0
+                : w != null ? w / 2.0 : h != null ? h / 2.0 : 0.0,
           );
 
     Widget content = Padding(
@@ -104,7 +110,7 @@ class Box extends StatelessWidget {
       child: child,
     );
 
-    if (circle || clip) {
+    if (circle || (clip && br != BorderRadius.zero)) {
       content = circle
           ? ClipOval(child: content)
           : ClipRRect(
@@ -119,11 +125,13 @@ class Box extends StatelessWidget {
         type: MaterialType.transparency,
         shape: circle ? const CircleBorder() : RoundedRectangleBorder(borderRadius: br),
         child: InkWell(
-          splashColor: showInkWell ? splashColor ?? theme.splashColor : Colors.transparent,
+          splashColor:
+              showInkWell ? splashColor ?? theme.splashColor : Colors.transparent,
           highlightColor: showInkWell ? theme.highlightColor : Colors.transparent,
           hoverColor: showInkWell ? theme.hoverColor : Colors.transparent,
           focusColor: showInkWell ? theme.focusColor : Colors.transparent,
-          customBorder: circle ? const CircleBorder() : RoundedRectangleBorder(borderRadius: br),
+          customBorder:
+              circle ? const CircleBorder() : RoundedRectangleBorder(borderRadius: br),
           onTap: onTap,
           onLongPress: onLongPress,
           onDoubleTap: onDoubleTap,
@@ -132,16 +140,17 @@ class Box extends StatelessWidget {
       );
     }
 
-    final List<BoxShadow> boxShadow = boxShadows ?? (elevation > 0 && (shadowColor?.opacity ?? 0) > 0)
-        ? [
-            BoxShadow(
-              color: shadowColor ?? Colors.black12,
-              offset: _getShadowOffset(min(elevation / 5.0, 1.0)),
-              blurRadius: elevation,
-              spreadRadius: 0,
-            ),
-          ]
-        : null;
+    final List<BoxShadow> boxShadow =
+        boxShadows ?? (elevation > 0 && (shadowColor?.opacity ?? 0) > 0)
+            ? [
+                BoxShadow(
+                  color: shadowColor ?? Colors.black12,
+                  offset: _getShadowOffset(min(elevation / 5.0, 1.0)),
+                  blurRadius: elevation,
+                  spreadRadius: 0,
+                ),
+              ]
+            : null;
 
     LinearGradient gradient;
     if (color is SimpleGradient) {
@@ -160,7 +169,7 @@ class Box extends StatelessWidget {
     final boxDecoration = BoxDecoration(
       color: color is Color ? color : null,
       gradient: gradient,
-      borderRadius: circle || border?.isUniform == false ? null : br,
+      borderRadius: !circle && (border == null || border.isUniform) ? br : null,
       shape: circle ? BoxShape.circle : BoxShape.rectangle,
       boxShadow: boxShadow,
       border: border,
@@ -189,9 +198,10 @@ class Box extends StatelessWidget {
           );
   }
 
-  Offset _getShadowOffset(double ele) {
-    final ym = 5 * ele;
-    final xm = 2 * ele;
+  Offset _getShadowOffset(double elevation) {
+    final ym = 5 * elevation;
+    final xm = 2 * elevation;
+
     switch (shadowDirection) {
       case ShadowDirection.topLeft:
         return Offset(-1 * xm, -1 * ym);

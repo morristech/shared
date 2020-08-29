@@ -1,5 +1,5 @@
 settings: Settings
-hours: {1: $i Hour, else: $i Hours}
+hours: {1: $i hour, else: $i hours}
 remaining_time: 'You have {1: $i hour, else: $i hours} left.'
 
 # [Home]

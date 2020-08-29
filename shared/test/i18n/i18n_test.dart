@@ -13,5 +13,6 @@ void main() async {
   test('Should translate a key correctly', () async {
     expect('Settings'.i18n, equals('Einstellungen'));
     expect('You have {10 hours} left.'.i18n, equals('Dir verbleiben 10 Stunden.'));
+    expect('{10 hours}'.i18n, '10 Stunden');
   });
 }

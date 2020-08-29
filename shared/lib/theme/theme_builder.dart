@@ -15,7 +15,7 @@ class AppTheme {
     @required this.themeData,
     @required this.schema,
     @required this.uiOverlayStyle,
-  }) : assert(key != null),
+  })  : assert(key != null),
         assert(themeData != null),
         assert(uiOverlayStyle != null);
 
@@ -38,7 +38,8 @@ class AppTheme {
 }
 
 class ThemeBuilder extends StatefulWidget {
-  final Widget Function(BuildContext, AppTheme lightTheme, AppTheme darkTheme, ThemeMode) builder;
+  final Widget Function(BuildContext, AppTheme lightTheme, AppTheme darkTheme, ThemeMode)
+      builder;
   final List<AppTheme> themes;
   final bool setUiOverlayStyle;
   ThemeBuilder({
@@ -91,9 +92,9 @@ class ThemeBuilderState extends State<ThemeBuilder> {
 
   void _assignDefaultThemes() {
     for (final theme in widget.themes) {
-      if (theme.isLight && lightTheme == null || theme.key == lightTheme.key) {
+      if (theme.isLight && (lightTheme == null || theme.key == lightTheme.key)) {
         lightTheme = theme;
-      } else if (theme.isDark && darkTheme == null || theme.key == darkTheme.key) {
+      } else if (theme.isDark && (darkTheme == null || theme.key == darkTheme.key)) {
         darkTheme = theme;
       }
     }
