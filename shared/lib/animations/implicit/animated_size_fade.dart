@@ -29,7 +29,8 @@ class AnimatedSizeFade extends StatefulWidget {
   _AnimatedSizeFadeState createState() => _AnimatedSizeFadeState();
 }
 
-class _AnimatedSizeFadeState extends State<AnimatedSizeFade> with SingleTickerProviderStateMixin {
+class _AnimatedSizeFadeState extends State<AnimatedSizeFade>
+    with SingleTickerProviderStateMixin {
   AnimationController _controller;
 
   @override
@@ -39,7 +40,8 @@ class _AnimatedSizeFadeState extends State<AnimatedSizeFade> with SingleTickerPr
     _controller = AnimationController(
       duration: widget.duration,
       vsync: this,
-    )..value = widget.show ? 1.0 : 0.0;
+      value: widget.show ? 1.0 : 0.0,
+    );
   }
 
   @override
