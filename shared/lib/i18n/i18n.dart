@@ -142,6 +142,10 @@ class I18n {
       "The string '$input' couldn't be matched to a key in the ${language.code} translation file!",
     );
 
+    if (translation == null) {
+      return input;
+    }
+
     final srcPlaceholders = Placeholder.matchAll(input);
     final targetPlaceholders = Placeholder.matchAll(translation);
 
@@ -171,6 +175,21 @@ class I18n {
 
       return result;
     }
+  }
+
+  static String ofKey(String key, {List placeholders = const []}) {
+    String translation = currentTranslations[key];
+    
+    assert(
+      translation != null,
+      'No translation for key $key in language file ${language.code}',
+    );
+
+    for (final placeholder in placeholders) {
+      translation = translation.replaceFirst(placeholderRegex, placeholder.toString());
+    }
+
+    return translation;
   }
 
   static String _plural(Placeholder placeholder, String input) {
