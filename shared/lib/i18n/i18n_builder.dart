@@ -4,12 +4,10 @@ import 'package:shared/shared.dart';
 class I18nBuilder extends StatefulWidget {
   final List<Language> languages;
   final Widget Function(BuildContext context, Language language, bool loaded) builder;
-  final bool initializeDateFormatting;
   const I18nBuilder({
     Key key,
     @required this.languages,
     @required this.builder,
-    this.initializeDateFormatting,
   })  : assert(builder != null),
         // ignore: prefer_is_empty
         assert(languages.length > 0),
@@ -29,7 +27,6 @@ class _I18nBuilderState extends State<I18nBuilder> {
   Future<void> _init() async {
     await I18n.init(
       widget.languages,
-      usesIntl: widget.initializeDateFormatting,
     );
 
     I18n.addListener(_onLanguageChanged);

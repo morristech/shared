@@ -304,7 +304,7 @@ class Strings {
 
   static void _initializeDateFormatting() {
     if (initializeDateFormatting) {
-      intl.initializeDateFormatting(language.code);
+      // intl.initializeDateFormatting(language.code);
     }
   }
 

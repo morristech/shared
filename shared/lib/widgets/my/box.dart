@@ -95,7 +95,7 @@ class Box extends StatelessWidget {
 
     final r = radius != null ? radius * 2 : null;
     final h = (r ?? height)?.toDouble();
-    final w = (r ?? (h != null && width != WRAP ? double.infinity : width))?.toDouble();
+    final w = (r ?? (height != null && width == null ? double.infinity : width))?.toDouble();
 
     final BorderRadius br = borderRadius is BorderRadius
         ? borderRadius

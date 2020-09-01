@@ -160,8 +160,6 @@ class MyApp extends StatelessWidget {
 
   final List<AppTheme> themes;
 
-  final bool initializeDateFormatting;
-
   final bool setUiOverlayStyle;
 
   final Widget splashScreen;
@@ -190,7 +188,6 @@ class MyApp extends StatelessWidget {
     this.actions,
     this.debugShowMaterialGrid = false,
     this.themes,
-    this.initializeDateFormatting,
     this.setUiOverlayStyle = false,
     this.splashScreen,
     this.layout = const LayoutPreferences(),
@@ -213,7 +210,6 @@ class MyApp extends StatelessWidget {
     if (useLocalizedBuilder) {
       return I18nBuilder(
         languages: languages,
-        initializeDateFormatting: initializeDateFormatting,
         builder: (context, language, loaded) {
           if (!loaded) {
             return splashScreen ?? Container();

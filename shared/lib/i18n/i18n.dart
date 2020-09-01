@@ -3,8 +3,9 @@ import 'dart:ui';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/date_symbol_data_local.dart' as intl;
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'package:meta/meta.dart';
 
 import 'package:shared/shared.dart';
@@ -26,7 +27,6 @@ class I18n {
 
   static String dir = 'i18n';
   static bool inspectLocales = true;
-  static bool usesIntl = false;
 
   static Language _language;
   static Language get language => _language;
@@ -47,17 +47,15 @@ class I18n {
   static final placeholderRegex = RegExp(r'{(.*?)}');
 
   static Future<void> init(
-    List<Language> languages, {
-    bool usesIntl = false,
-  }) async {
+    List<Language> languages,
+  ) async {
     assert(languages.isNotEmpty);
 
-    I18n.usesIntl = usesIntl == true;
     I18n._languages = languages;
 
     await _loadLanguage();
     await _inspectLocales();
-    await Strings.init(languages, initializeDateFormatting: usesIntl);
+    await Strings.init(languages );
 
     _subscribeToChangesInLocale();
   }
@@ -179,7 +177,7 @@ class I18n {
 
   static String ofKey(String key, {List placeholders = const []}) {
     String translation = currentTranslations[key];
-    
+
     assert(
       translation != null,
       'No translation for key $key in language file ${language.code}',
@@ -257,14 +255,7 @@ class I18n {
     _language = await _getPersistedLanguage();
     currentTranslations = await loadTranslations(_language);
     defaultTranslations = await loadTranslations(defaultLanguage);
-    _updateIntl();
-  }
-
-  static void _updateIntl() {
-    if (usesIntl) {
-      intl.initializeDateFormatting(language.code);
-      Intl.defaultLocale = language.code;
-    }
+    Intl.defaultLocale = language.code;
   }
 
   static Future<Language> _getPersistedLanguage() async {

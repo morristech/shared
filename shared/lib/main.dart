@@ -4,7 +4,10 @@ import 'package:shared/shared.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await I18n.init([Language.english, Language.german], usesIntl: true);
+  await I18n.init([
+    Language.english,
+    Language.german,
+  ]);
   runApp(MyApp());
 }
 
