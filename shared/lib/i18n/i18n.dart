@@ -55,7 +55,7 @@ class I18n {
 
     await _loadLanguage();
     await _inspectLocales();
-    await Strings.init(languages );
+    await Strings.init(languages);
 
     _subscribeToChangesInLocale();
   }
@@ -175,16 +175,31 @@ class I18n {
     }
   }
 
-  static String ofKey(String key, {List placeholders = const []}) {
+  static String key(String key, [dynamic placeholders = const []]) {
     String translation = currentTranslations[key];
+
+    if (placeholders is! List) {
+      placeholders = [placeholders];
+    }
 
     assert(
       translation != null,
       'No translation for key $key in language file ${language.code}',
     );
 
-    for (final placeholder in placeholders) {
-      translation = translation.replaceFirst(placeholderRegex, placeholder.toString());
+    final targetPlaceholders = Placeholder.matchAll(translation);
+
+    for (var i = 0; i < targetPlaceholders.length; i++) {
+      final targetPlaceholder = targetPlaceholders[i];
+      final srcPlaceholder = (placeholders as List).getOrNull(i);
+      if (srcPlaceholder == null) break;
+
+      String replacement = srcPlaceholder.toString();
+      if (targetPlaceholder.isPlural) {
+        replacement = _plural(targetPlaceholder, replacement);
+      }
+
+      translation = translation.replaceFirst(placeholderRegex, replacement);
     }
 
     return translation;
@@ -377,7 +392,6 @@ class Placeholder extends DelegatingMap<String, String> {
 
   static final RegExp pluralRegex = RegExp(r'(([0-9]:)+|(&i)+)');
 
-  bool get isConditional => isNotEmpty;
   bool get isPlural => pluralRegex.hasMatch(_removeBrackets(src));
 
   static List<Placeholder> matchAll(String src) {

@@ -10,9 +10,15 @@ void main() async {
 
   I18n.setLanguage(Language.german);
 
-  test('Should translate a key correctly', () async {
+  test('Should match a string to the correct key', () async {
     expect('Settings'.i18n, equals('Einstellungen'));
     expect('You have {10 hours} left.'.i18n, equals('Dir verbleiben 10 Stunden.'));
     expect('{10 hours}'.i18n, '10 Stunden');
+  });
+
+  test('Should translate a key correctly', () async {
+    expect(I18n.key('settings'), equals('Einstellungen'));
+    expect(I18n.key('hours', [1]), equals('1 Stunde'));
+    expect(I18n.key('remaining_time', 10), equals('Dir verbleiben 10 Stunden.'));
   });
 }
