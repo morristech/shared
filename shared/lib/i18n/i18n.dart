@@ -62,7 +62,7 @@ class I18n {
 
   static Future<void> test(dynamic languages) async {
     assert(languages is List<Language> || languages is Language);
-    final langs = languages is List ? languages : [languages];
+    final langs = languages is List ? languages : <Language>[languages];
 
     _isTest = true;
     _language = langs.first;
@@ -83,6 +83,8 @@ class I18n {
   /// and then maps it over to the corresponding translation in the language
   /// of the app.
   static String of(String input) {
+    if (input == null) return 'null';
+
     String translationKey;
 
     final keys = defaultTranslations.keys.toList();
@@ -270,7 +272,13 @@ class I18n {
     _language = await _getPersistedLanguage();
     currentTranslations = await loadTranslations(_language);
     defaultTranslations = await loadTranslations(defaultLanguage);
-    Intl.defaultLocale = language.code;
+  }
+
+  static void _updateIntl() {
+    try {
+      Intl.defaultLocale = language.code;
+      initializeDateFormatting(language.code);
+    } catch (_) {}
   }
 
   static Future<Language> _getPersistedLanguage() async {

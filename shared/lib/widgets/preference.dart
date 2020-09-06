@@ -135,29 +135,14 @@ class _PreferenceState extends State<Preference> {
     return AnimatedSizeChanges(
       duration: const Duration(milliseconds: 250),
       curve: Curves.ease,
-      child: Box(
+      child: ListBox(
+        title: title,
+        subtitle: summary,
+        leading: leading,
+        trailing: trailing,
+        reserveIconSpace: reserveIconSpace,
         onTap: widget.onTap,
         padding: widget.padding ?? const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            if (leading != null) leading,
-            SizedBox(width: leading != null ? 16 : reserveIconSpace ? 56 : 0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  if (title != null) title,
-                  if (summary != null) const SizedBox(height: 4),
-                  if (summary != null) summary,
-                ],
-              ),
-            ),
-            if (trailing != null) const SizedBox(width: 16),
-            if (trailing != null) trailing,
-          ],
-        ),
       ),
     );
   }

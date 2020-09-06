@@ -129,6 +129,27 @@ extension IterableExtension<T> on Iterable<T> {
 
     return result;
   }
+
+  /// Filters all duplicates from this [List].
+  ///
+  /// The type must implement value equality for this to work.
+  List<T> distinct() => toSet().toList();
+
+  /// Creates a new [List] with all elements that pass the [test].
+  ///
+  /// This is usefull for example for filtering duplicates that don't
+  /// have strictly the same value equality.
+  List<T> distinctBy(bool Function(List<T> result, T item) test) {
+    final List<T> result = [];
+
+    for (final item in this) {
+      if (test(result, item)) {
+        result.add(item);
+      }
+    }
+
+    return result;
+  }
 }
 
 extension MyListExtension<T> on List<T> {
@@ -196,8 +217,4 @@ extension MyListExtension<T> on List<T> {
 
 extension NumIterableX on Iterable<num> {
   double get avg => count((v) => v) / length;
-}
-
-extension MapExtensions<K, V> on Map<K, V> {
-  V get(String key) => this[key];
 }

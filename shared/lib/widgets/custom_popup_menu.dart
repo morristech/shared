@@ -4,7 +4,7 @@ import 'package:shared/shared.dart';
 class CustomPopUpMenuButton extends StatefulWidget {
   final Color dimColor;
   final EdgeInsets padding;
-  final Widget child;
+  final Widget menu;
   final dynamic icon;
   final Color color;
   final double iconSize;
@@ -15,7 +15,7 @@ class CustomPopUpMenuButton extends StatefulWidget {
     this.dimColor = Colors.transparent,
     this.onDismiss,
     this.padding = const EdgeInsets.all(8),
-    this.child,
+    this.menu,
     this.icon,
     this.iconSize = 24.0,
     this.color,
@@ -50,7 +50,7 @@ class _CustomPopUpMenuButtonState extends State<CustomPopUpMenuButton> {
                 Offset(anchor.dx, anchor.dy),
                 Size(widget.iconSize, widget.iconSize),
               ),
-              child: widget.child,
+              child: widget.menu,
               routeAnimation: animation,
               dimColor: widget.dimColor,
             ),
@@ -175,7 +175,8 @@ class _CustomPopUpMenuState extends State<_CustomPopUpMenu>
 
     final backDrop = GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.pop(context),
+      onPanEnd: (_) => Navigator.pop(context),
+      onPanCancel: () => Navigator.pop(context),
       child: FadeTransition(
         opacity: _animation,
         child: Container(

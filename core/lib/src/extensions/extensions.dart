@@ -1,4 +1,5 @@
 export 'iterable.dart';
+export 'map.dart';
 export 'num.dart';
 export 'string.dart';
 export 'time.dart';

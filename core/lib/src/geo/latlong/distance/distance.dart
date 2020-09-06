@@ -56,7 +56,7 @@ class Distance implements DistanceCalculator {
   ///
   double as(final LengthUnit unit, final LatLng p1, final LatLng p2) {
     final double dist = _calculator.distance(p1, p2);
-    return LengthUnit.Meter.to(unit, dist);
+    return LengthUnit.meter.to(unit, dist);
   }
 
   /// Computes the distance between two points.

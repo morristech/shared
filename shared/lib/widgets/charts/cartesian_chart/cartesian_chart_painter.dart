@@ -274,7 +274,6 @@ abstract class CartesianChartPainter<
             start,
             end,
             _pt,
-            dashPattern: guide?.dashPattern,
           );
         } else if (guide.style == GuideStyle.bar && i.isEven && !isLast) {
           final wm = w / verticalGuideCount;
@@ -386,7 +385,6 @@ abstract class CartesianChartPainter<
             start,
             end,
             _pt,
-            dashPattern: guide?.dashPattern,
           );
         } else if (guide.style == GuideStyle.bar && !i.isEven) {
           final hm = h / horizontalGuideCount;

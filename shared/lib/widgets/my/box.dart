@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
 import 'package:shared/shared.dart';
 
 enum ShadowDirection {
@@ -95,7 +96,8 @@ class Box extends StatelessWidget {
 
     final r = radius != null ? radius * 2 : null;
     final h = (r ?? height)?.toDouble();
-    final w = (r ?? (height != null && width == null ? double.infinity : width))?.toDouble();
+    final w =
+        (r ?? (height != null && width == null ? double.infinity : width))?.toDouble();
 
     final BorderRadius br = borderRadius is BorderRadius
         ? borderRadius
@@ -231,5 +233,97 @@ class Box extends StatelessWidget {
         return Offset.zero;
         break;
     }
+  }
+}
+
+class ListBox extends StatelessWidget {
+  final Widget title;
+  final Widget subtitle;
+  final dynamic leading;
+  final dynamic trailing;
+  final EdgeInsets padding;
+  final bool reserveIconSpace;
+  final VoidCallback onTap;
+  final Color color;
+  final bool isEnabled;
+  final double maxWidth;
+  const ListBox({
+    Key key,
+    @required this.title,
+    this.subtitle,
+    this.leading,
+    this.trailing,
+    this.padding,
+    this.reserveIconSpace = false,
+    this.onTap,
+    this.color,
+    this.isEnabled,
+    this.maxWidth,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    Widget leading = this.leading;
+    if (leading is Icon) {
+      leading = Container(
+        width: 36,
+        alignment: Alignment.center,
+        child: leading,
+      );
+    }
+
+    Widget trailing = this.trailing;
+    if (trailing is Icon) {
+      trailing = Container(
+        width: 40,
+        alignment: Alignment.center,
+        child: trailing,
+      );
+    }
+
+    final box = Box(
+      color: color,
+      onTap: onTap,
+      constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
+      padding: padding ?? const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          if (leading != null) leading,
+          SizedBox(width: leading != null ? 16 : reserveIconSpace ? 56 : 0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (title != null)
+                  DefaultTextStyle(style: textTheme.subtitle1, child: title),
+                if (subtitle != null) const SizedBox(height: 4),
+                if (subtitle != null)
+                  DefaultTextStyle(style: textTheme.subtitle2, child: subtitle),
+              ],
+            ),
+          ),
+          if (trailing != null) const SizedBox(width: 16),
+          if (trailing != null) trailing,
+        ],
+      ),
+    );
+
+    if (isEnabled != null) {
+      return AnimatedOpacity(
+        opacity: isEnabled ? 1.0 : 0.5,
+        duration: const Millis(400),
+        child: IgnorePointer(
+          ignoring: !isEnabled,
+          child: box,
+        ),
+      );
+    }
+
+    return box;
   }
 }

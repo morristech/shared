@@ -68,7 +68,7 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
-        if (notification.metrics.axis == Axis.horizontal) {
+        if (notification.metrics.axis != Axis.vertical) {
           return false;
         }
 
@@ -88,42 +88,38 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
       },
       child: Stack(
         children: <Widget>[
-          ValueListenableBuilder(
-            valueListenable: _elevation,
-            builder: (context, value, appBar) {
-              return Box(
-                elevation: value,
-                shadowColor: widget.shadowColor ?? Colors.black.withOpacity(0.2),
-                child: appBar,
-              );
-            },
-            child: SizedBox.fromSize(
-              size: Size.fromHeight(height),
-              child: AppBar(
-                elevation: 0.0,
-                actions: widget.actions,
-                actionsIconTheme: widget.actionsIconTheme,
-                automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                backgroundColor: widget.backgroundColor,
-                bottom: widget.bottom,
-                bottomOpacity: widget.bottomOpacity,
-                centerTitle: widget.centerTitle,
-                flexibleSpace: widget.flexibleSpace,
-                iconTheme: widget.iconTheme,
-                leading: widget.leading,
-                primary: widget.primary,
-                shape: widget.shape,
-                textTheme: widget.textTheme,
-                title: widget.title,
-                titleSpacing: widget.titleSpacing,
-                toolbarOpacity: widget.toolbarOpacity,
-                brightness: widget.brightness,
-              ),
-            ),
-          ),
           Padding(
             padding: EdgeInsets.only(top: height),
             child: widget.body,
+          ),
+          ValueListenableBuilder(
+            valueListenable: _elevation,
+            builder: (context, value, appBar) {
+              return SizedBox.fromSize(
+                size: Size.fromHeight(height),
+                child: AppBar(
+                  elevation: value,
+                  shadowColor: widget.shadowColor,
+                  actions: widget.actions,
+                  actionsIconTheme: widget.actionsIconTheme,
+                  automaticallyImplyLeading: widget.automaticallyImplyLeading,
+                  backgroundColor: widget.backgroundColor,
+                  bottom: widget.bottom,
+                  bottomOpacity: widget.bottomOpacity,
+                  centerTitle: widget.centerTitle,
+                  flexibleSpace: widget.flexibleSpace,
+                  iconTheme: widget.iconTheme,
+                  leading: widget.leading,
+                  primary: widget.primary,
+                  shape: widget.shape,
+                  textTheme: widget.textTheme,
+                  title: widget.title,
+                  titleSpacing: widget.titleSpacing,
+                  toolbarOpacity: widget.toolbarOpacity,
+                  brightness: widget.brightness,
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -14,9 +14,11 @@ import 'package:shared/shared.dart';
 /// that is an empty path will return an empty path.
 Path dashPath(
   Path source, {
-  @required DashPattern dashArray,
+  @required List<double> pattern,
   DashOffset dashOffset,
 }) {
+  final dashArray = DashPattern(pattern);
+  
   if (source == null || dashArray == null || dashArray.isZero) return source;
   dashOffset ??= const DashOffset.absolute(0.0);
 

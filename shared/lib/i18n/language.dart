@@ -6,35 +6,36 @@ class Language {
   final String name;
   final String englishName;
   final String code;
-  final Locale _locale;
   const Language({
     @required this.name,
     this.englishName,
     @required this.code,
-    Locale locale,
-  }) : _locale = locale;
+  });
 
-  Locale get locale => _locale ?? Locale(code);
+  String get langCode => code.split('_').first;
+  String get countryCode {
+    final codes = code.split('_');
+    return codes.length > 1 ? codes[1] : null;
+  }
+
+  Locale get locale => Locale(langCode, countryCode);
 
   static const Language english = Language(
     name: 'English',
     englishName: 'English',
     code: 'en',
-    locale: Locale('en'),
   );
 
   static const Language german = Language(
     name: 'Deutsch',
     englishName: 'German',
     code: 'de',
-    locale: Locale('de'),
   );
 
   static const Language french = Language(
     name: 'France',
     englishName: 'French',
     code: 'fr',
-    locale: Locale('fr'),
   );
 
   Language copyWith({
@@ -47,7 +48,6 @@ class Language {
       name: name ?? this.name,
       englishName: englishName ?? this.englishName,
       code: code ?? this.code,
-      locale: locale ?? this.locale,
     );
   }
 
@@ -66,7 +66,6 @@ class Language {
       name: map['name'] ?? '',
       englishName: map['englishName'] ?? '',
       code: map['code'] ?? '',
-      locale: Locale.fromSubtags(languageCode: map['code'] ?? ''),
     );
   }
 
@@ -86,12 +85,11 @@ class Language {
     return o is Language &&
         o.name == name &&
         o.englishName == englishName &&
-        o.code == code &&
-        o._locale == _locale;
+        o.code == code;
   }
 
   @override
   int get hashCode {
-    return name.hashCode ^ englishName.hashCode ^ code.hashCode ^ _locale.hashCode;
+    return name.hashCode ^ englishName.hashCode ^ code.hashCode;
   }
 }

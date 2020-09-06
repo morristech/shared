@@ -1,28 +1,89 @@
 part of 'translater_page.dart';
 
-class _TranslationEditPage extends StatefulWidget {
-  final TranslaterEditState state;
-  const _TranslationEditPage({
+class _TranslaterEditPage extends StatefulWidget {
+  final TranslaterCube cube;
+  const _TranslaterEditPage({
     Key key,
-    this.state,
+    this.cube,
   }) : super(key: key);
 
   @override
-  _TranslationEditPageState createState() => _TranslationEditPageState();
+  _TranslaterEditPageState createState() => _TranslaterEditPageState();
 }
 
-class _TranslationEditPageState extends State<_TranslationEditPage> {
+class _TranslaterEditPageState extends State<_TranslaterEditPage> {
   final List<FocusNode> nodes = [];
 
   final _formKey = GlobalKey<FormState>();
   FormState get form => _formKey.currentState;
 
-  TranslaterEditState get state => widget.state;
-  String get language => state.language;
-  List<Translation> get translations => state.translations;
+  TranslaterCube get cube => widget.cube;
 
   @override
   Widget build(BuildContext context) {
+    return CubeProvider.value(
+      value: widget.cube,
+      child: Cubx<TranslaterCube>(
+        builder: (_, cube) {
+          return LiftOnScrollAppBar(
+            maxElevation: 12,
+            title: Text(cube.language),
+            actions: [
+              buildOverflowMenu(),
+            ],
+            body: Scaffold(
+              body: cube.isLoading ? buildLoading() : buildForm(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget buildOverflowMenu() {
+    Widget buildItem(String text, IconData icon, VoidCallback onTap) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 200),
+        child: IntrinsicWidth(
+          child: ListBox(
+            leading: icon,
+            trailing: const SizedBox(),
+            onTap: () {
+              onTap();
+              Navigator.pop(context);
+            },
+            title: Text(
+              text,
+              style: textTheme.bodyText1,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return CustomPopUpMenuButton(
+      icon: const Icon(Icons.more_vert),
+      menu: Box(
+        color: theme.cardColor,
+        elevation: 8,
+        borderRadius: 6,
+        child: Vertical(
+          children: [
+            buildItem('Reset', Icons.restore, cube.onReset),
+            buildItem('Submit', Icons.check, cube.onSubmitAll),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildLoading() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget buildForm() {
     final fields = buildFields();
 
     return Form(
@@ -52,7 +113,7 @@ class _TranslationEditPageState extends State<_TranslationEditPage> {
 
   Widget buildInstructions() {
     // ignore: prefer_interpolation_to_compose_strings
-    final instructions = 'Thanks for wanting to contribute a $language translation!\n\n' +
+    final instructions = 'Thanks for wanting to contribute a ${cube.language} translation!\n\n' +
         'Below is a list of all the words and sentences this app uses. You do not have to translate all of ' +
         'them and some may already have been translated.\n\n' +
         'Occasionally you may see words that are colored in {red}. These are placeholders which will be replaced with ' +
@@ -83,7 +144,7 @@ class _TranslationEditPageState extends State<_TranslationEditPage> {
   }
 
   List<Widget> buildFields() {
-    return translations
+    return cube.translations
         .mapWithIndex((translation, index) {
           var node = nodes.getOrNull(index);
           final nextNode = nodes.getOrNull(index + 1);
@@ -173,11 +234,11 @@ class _TranslationFormFieldState extends State<_TranslationFormField> {
           borderSide: BorderSide(color: theme.accentColor),
         ),
         errorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: schema.error),
+          borderSide: BorderSide(color: schema?.error ?? Colors.red),
         ),
       ),
       onFieldSubmitted: (value) {
-        context.bloc<TranslaterCubit>().onTranslationSubmitted(translation);
+        context.cube<TranslaterCube>().onTranslationSubmitted(translation);
         widget.nextNode?.requestFocus();
       },
       // ignore: missing_return

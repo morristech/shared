@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart' hide Placeholder;
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:shared/shared.dart';
 
-import 'cubit/translater_cubit.dart';
+import 'cube/translater_cube.dart';
 import 'model/translation.dart';
 
-part 'language_chooser_page.dart';
 part 'submitted_page.dart';
 part 'translation_edit_page.dart';
+part 'language_chooser_page.dart';
 
 class TranslaterPage extends StatelessWidget {
   final String appName;
@@ -19,49 +18,68 @@ class TranslaterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TranslaterCubit(),
-      child: BlocBuilder<TranslaterCubit, TranslaterState>(
-        builder: (context, state) {
-          final child = state.let((it) {
-            if (state is TranslaterLoadingState) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is TranslaterLanguageChooserState) {
-              return _LanguageChooserPage(languages: state.languages);
-            } else if (state is TranslaterEditState) {
-              return _TranslationEditPage(state: state);
-            } else if (state is TranslaterSubmittedState) {
-              return const _SubmittedPage();
-            }
-          });
-
-          return Scaffold(
-            body: LiftOnScrollAppBar(
-              maxElevation: 8,
-              title: Text(
-                state is TranslaterEditState ? state.language : 'Translate $appName',
-              ),
-              actions: [buildSubmitButton(context, state), const SizedBox(width: 16),],
-              body: child,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget buildSubmitButton(BuildContext context, TranslaterState state) {
-    return AnimatedOpacity(
-      opacity: state is TranslaterEditState && state.isSubmittable ? 1.0 : 0.0,
-      duration: const Millis(400),
-      child: Center(
-        child: OutlineButton(
-          borderSide: const BorderSide(color: Colors.white, width: 2),
-          highlightedBorderColor: Colors.white.withOpacity(0.7),
-          onPressed: context.bloc<TranslaterCubit>().onSubmitAll,
-          child: const Text('Submit'),
+    return Scaffold(
+      body: LiftOnScrollAppBar(
+        title: Text('Translate $appName'),
+        body: CubeProvider<TranslaterCube>(
+          create: (_) => TranslaterCube(),
+          child: buildBody(),
         ),
       ),
     );
   }
+
+  Widget buildBody() {
+    final languages = I18n.languages;
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemCount: languages.length,
+      itemBuilder: (context, index) {
+        final theme = Theme.of(context);
+        final textTheme = theme.textTheme;
+
+        final isFirst = index == 0;
+        final language = languages[index];
+
+        final tile = ListTile(
+          title: Text(language.name),
+          subtitle: Text(language.englishName),
+          onTap: () {
+            pushRoute(
+              context,
+              _TranslaterEditPage(
+                cube: context.cube<TranslaterCube>()..onLanguageChoosen(language),
+              ),
+            );
+          },
+        );
+
+        if (isFirst) {
+          return Vertical(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Translated languages',
+                  style: textTheme.bodyText1.copyWith(
+                    color: theme.accentColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              tile,
+            ],
+          );
+        }
+
+        return tile;
+      },
+    );
+  }
+
+  Future<T> pushRoute<T>(BuildContext context, Widget page) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => page),
+      );
 }

@@ -95,10 +95,10 @@ extension CanvasExtension on Canvas {
   void drawDashPath(
     Path source,
     Paint paint, {
-    @required DashPattern dashArray,
+    @required List<double> pattern,
     DashOffset dashOffset,
   }) {
-    final path = dashPath(source, dashArray: dashArray, dashOffset: dashOffset);
+    final path = dashPath(source, pattern: pattern, dashOffset: dashOffset);
     drawPath(path, paint);
   }
 }

@@ -54,14 +54,14 @@ abstract class BasePainter extends CustomPainter {
   Path drawPath(
     Path path,
     Paint paint, {
-    DashPattern dashPattern,
+    List<double> dashPattern,
     DashOffset dashOffset,
   }) {
     final p = dashPattern == null
         ? path
         : dashPath(
             path,
-            dashArray: dashPattern,
+            pattern: dashPattern,
             dashOffset: dashOffset,
           );
 
@@ -201,7 +201,7 @@ abstract class BasePainter extends CustomPainter {
     Offset a,
     Offset b,
     Paint paint, {
-    DashPattern dashPattern,
+    List<double> dashPattern,
     DashOffset dashOffset,
   }) {
     if (dashPattern != null) {

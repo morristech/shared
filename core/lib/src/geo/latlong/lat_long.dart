@@ -60,7 +60,7 @@ class LatLng {
 
   double distanceTo(
     LatLng latLng, {
-    LengthUnit unit = LengthUnit.Meter,
+    LengthUnit unit = LengthUnit.meter,
     DistanceAlgorithm algorithm = DistanceAlgorithm.vincenty,
   }) {
     final Distance distance = algorithm == DistanceAlgorithm.vincenty
