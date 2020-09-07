@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
 import 'package:shared/shared.dart';
 
 enum ShadowDirection {
@@ -36,8 +35,8 @@ class Box extends StatelessWidget {
   final num width;
   final num radius;
   final Border border;
-  final EdgeInsets margin;
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry padding;
   final Widget child;
   final dynamic color;
   final Color shadowColor;
@@ -83,7 +82,6 @@ class Box extends StatelessWidget {
             color is Color ||
             color is SimpleGradient ||
             color is Gradient),
-        assert(borderRadius != null),
         super(key: key);
 
   static const WRAP = -1;
@@ -99,7 +97,7 @@ class Box extends StatelessWidget {
     final w =
         (r ?? (height != null && width == null ? double.infinity : width))?.toDouble();
 
-    final BorderRadius br = borderRadius is BorderRadius
+    final BorderRadiusGeometry br = borderRadius is BorderRadiusGeometry
         ? borderRadius
         : BorderRadius.circular(
             !circle
@@ -116,7 +114,7 @@ class Box extends StatelessWidget {
       content = circle
           ? ClipOval(child: content)
           : ClipRRect(
-              borderRadius: br,
+              borderRadius: br.resolve(Directionality.of(context)),
               child: content,
             );
     }
@@ -241,12 +239,14 @@ class ListBox extends StatelessWidget {
   final Widget subtitle;
   final dynamic leading;
   final dynamic trailing;
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
   final bool reserveIconSpace;
   final VoidCallback onTap;
   final Color color;
   final bool isEnabled;
   final double maxWidth;
+  final Duration duration;
+  final BorderRadiusGeometry borderRadius;
   const ListBox({
     Key key,
     @required this.title,
@@ -259,6 +259,8 @@ class ListBox extends StatelessWidget {
     this.color,
     this.isEnabled,
     this.maxWidth,
+    this.duration,
+    this.borderRadius,
   }) : super(key: key);
 
   @override
@@ -285,10 +287,12 @@ class ListBox extends StatelessWidget {
     }
 
     final box = Box(
+      duration: duration,
       color: color,
       onTap: onTap,
       constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
       padding: padding ?? const EdgeInsets.all(16),
+      borderRadius: borderRadius,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[

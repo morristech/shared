@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared/shared.dart';
 
 class LiftOnScrollAppBar extends StatefulWidget {
@@ -23,6 +24,8 @@ class LiftOnScrollAppBar extends StatefulWidget {
   final double toolbarOpacity;
   final double bottomOpacity;
   final Brightness brightness;
+  final bool showDivider;
+  final Color colorOnScroll;
   const LiftOnScrollAppBar({
     Key key,
     @required this.body,
@@ -46,6 +49,8 @@ class LiftOnScrollAppBar extends StatefulWidget {
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
     this.brightness,
+    this.showDivider = true,
+    this.colorOnScroll,
   }) : super(key: key);
 
   @override
@@ -53,14 +58,7 @@ class LiftOnScrollAppBar extends StatefulWidget {
 }
 
 class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
-  final ValueNotifier<double> _elevation = ValueNotifier(0.0);
-
-  @override
-  void initState() {
-    super.initState();
-
-    _elevation.value = widget.minElevation;
-  }
+  bool isAtTop = true;
 
   @override
   Widget build(BuildContext context) {
@@ -72,57 +70,78 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
           return false;
         }
 
-        final offset = notification.metrics.pixels.atLeast(0);
+        final offset = notification.metrics.pixels;
+        final isAtTop = offset <= 1.0;
 
-        final minElevation = widget.minElevation;
-        final maxElevation = widget.maxElevation;
-        final elevation = lerpDouble(
-          minElevation,
-          maxElevation,
-          ((offset / 10) / maxElevation).clamp(0.0, 1.0),
-        );
-
-        _elevation.value = elevation;
+        if (isAtTop != this.isAtTop) {
+          setState(() => this.isAtTop = isAtTop);
+        }
 
         return false;
       },
-      child: Stack(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: height),
-            child: widget.body,
-          ),
-          ValueListenableBuilder(
-            valueListenable: _elevation,
-            builder: (context, value, appBar) {
-              return SizedBox.fromSize(
-                size: Size.fromHeight(height),
-                child: AppBar(
-                  elevation: value,
-                  shadowColor: widget.shadowColor,
-                  actions: widget.actions,
-                  actionsIconTheme: widget.actionsIconTheme,
-                  automaticallyImplyLeading: widget.automaticallyImplyLeading,
-                  backgroundColor: widget.backgroundColor,
-                  bottom: widget.bottom,
-                  bottomOpacity: widget.bottomOpacity,
-                  centerTitle: widget.centerTitle,
-                  flexibleSpace: widget.flexibleSpace,
-                  iconTheme: widget.iconTheme,
-                  leading: widget.leading,
-                  primary: widget.primary,
-                  shape: widget.shape,
-                  textTheme: widget.textTheme,
-                  title: widget.title,
-                  titleSpacing: widget.titleSpacing,
-                  toolbarOpacity: widget.toolbarOpacity,
-                  brightness: widget.brightness,
-                ),
-              );
-            },
-          ),
-        ],
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: widget.showDivider
+            ? SystemUiOverlayStyle(
+                systemNavigationBarDividerColor: theme.dividerColor,
+              )
+            : null,
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: height),
+              child: widget.body,
+            ),
+            buildAppBar(height),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget buildAppBar(double height) {
+    return AnimatedValue(
+      value: isAtTop ? 0.0 : 1.0,
+      duration: const Millis(300),
+      builder: (context, value) {
+        final backgroundColor =
+            widget.backgroundColor ?? theme.appBarTheme?.color ?? theme.accentColor;
+        final colorOnScroll = widget.colorOnScroll ??
+            backgroundColor.let((it) => it.isBright ? it.darken(0.1) : it.lighten(0.1));
+        final color = Color.lerp(backgroundColor, colorOnScroll, value);
+
+        final brightness = () {
+          if (widget.brightness != null) {
+            return widget.brightness;
+          } else {
+            return color.isBright ? Brightness.light : Brightness.dark;
+          }
+        }();
+
+        return SizedBox.fromSize(
+          size: Size.fromHeight(height),
+          child: AppBar(
+            backgroundColor: color,
+            brightness: brightness,
+            elevation: lerpDouble(widget.minElevation, widget.maxElevation, value),
+            shadowColor: widget.shadowColor,
+            actions: widget.actions,
+            actionsIconTheme: widget.actionsIconTheme,
+            automaticallyImplyLeading: widget.automaticallyImplyLeading,
+            bottom: widget.bottom,
+            bottomOpacity: widget.bottomOpacity,
+            centerTitle: widget.centerTitle,
+            flexibleSpace: widget.flexibleSpace,
+            iconTheme: widget.iconTheme,
+            leading: widget.leading,
+            primary: widget.primary,
+            shape: widget.shape,
+            textTheme: widget.textTheme,
+            title: widget.title,
+            titleSpacing: widget.titleSpacing,
+            toolbarOpacity: widget.toolbarOpacity,
+          ),
+        );
+      },
     );
   }
 }

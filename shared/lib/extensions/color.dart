@@ -12,7 +12,7 @@ extension ColorExtensions on Color {
         1.0,
       );
 
-  double get brightness => ((red * 0.299) + (green * 0.587) + (blue * 0.114)) / 255;
+  double get brightness => computeLuminance();
 
   bool get isBright => brightness > 0.75;
   bool get isDark => brightness < 0.25;
