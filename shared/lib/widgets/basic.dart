@@ -1,71 +1,49 @@
 import 'package:flutter/material.dart';
 
 /// A compact [Column].
-class Vertical extends StatelessWidget {
-  final MainAxisAlignment mainAxisAlignment;
-  final MainAxisSize mainAxisSize;
-  final CrossAxisAlignment crossAxisAlignment;
-  final TextDirection textDirection;
-  final VerticalDirection verticalDirection;
-  final TextBaseline textBaseline;
-  final List<Widget> children;
-  const Vertical({
+class Vertical extends Column {
+  Vertical({
     Key key,
-    this.mainAxisAlignment = MainAxisAlignment.start,
-    this.mainAxisSize = MainAxisSize.min,
-    this.crossAxisAlignment = CrossAxisAlignment.start,
-    this.textDirection,
-    this.verticalDirection = VerticalDirection.down,
-    this.textBaseline,
-    this.children = const <Widget>[],
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: mainAxisAlignment,
-      mainAxisSize: mainAxisSize,
-      crossAxisAlignment: crossAxisAlignment,
-      children: children,
-      textBaseline: textBaseline,
-      textDirection: textDirection,
-      verticalDirection: verticalDirection,
-    );
-  }
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    MainAxisSize mainAxisSize = MainAxisSize.min,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline textBaseline,
+    @required List<Widget> children,
+  }) : super(
+          key: key,
+          mainAxisAlignment: mainAxisAlignment,
+          mainAxisSize: mainAxisSize,
+          crossAxisAlignment: crossAxisAlignment,
+          textDirection: textDirection,
+          verticalDirection: verticalDirection,
+          textBaseline: textBaseline,
+          children: children,
+        );
 }
 
 /// A compact Row
-class Horizontal extends StatelessWidget {
-  final MainAxisAlignment mainAxisAlignment;
-  final MainAxisSize mainAxisSize;
-  final CrossAxisAlignment crossAxisAlignment;
-  final TextDirection textDirection;
-  final VerticalDirection verticalDirection;
-  final TextBaseline textBaseline;
-  final List<Widget> children;
-  const Horizontal({
+class Horizontal extends Row {
+  Horizontal({
     Key key,
-    this.mainAxisAlignment = MainAxisAlignment.start,
-    this.mainAxisSize = MainAxisSize.min,
-    this.crossAxisAlignment = CrossAxisAlignment.center,
-    this.textDirection,
-    this.verticalDirection = VerticalDirection.down,
-    this.textBaseline,
-    this.children = const <Widget>[],
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: mainAxisAlignment,
-      mainAxisSize: mainAxisSize,
-      crossAxisAlignment: crossAxisAlignment,
-      children: children,
-      textBaseline: textBaseline,
-      textDirection: textDirection,
-      verticalDirection: verticalDirection,
-    );
-  }
+    MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+    MainAxisSize mainAxisSize = MainAxisSize.min,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection = VerticalDirection.down,
+    TextBaseline textBaseline,
+    @required List<Widget> children,
+  }) : super(
+          key: key,
+          mainAxisAlignment: mainAxisAlignment,
+          mainAxisSize: mainAxisSize,
+          crossAxisAlignment: crossAxisAlignment,
+          textDirection: textDirection,
+          verticalDirection: verticalDirection,
+          textBaseline: textBaseline,
+          children: children,
+        );
 }
 
 class SizeBuilder extends StatelessWidget {

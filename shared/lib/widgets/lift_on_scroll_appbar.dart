@@ -26,6 +26,8 @@ class LiftOnScrollAppBar extends StatefulWidget {
   final Brightness brightness;
   final bool showDivider;
   final Color colorOnScroll;
+  final double onScrollThreshold;
+  final bool expand;
   const LiftOnScrollAppBar({
     Key key,
     @required this.body,
@@ -51,6 +53,8 @@ class LiftOnScrollAppBar extends StatefulWidget {
     this.brightness,
     this.showDivider = true,
     this.colorOnScroll,
+    this.onScrollThreshold = 1.0,
+    this.expand = false,
   }) : super(key: key);
 
   @override
@@ -71,7 +75,7 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
         }
 
         final offset = notification.metrics.pixels;
-        final isAtTop = offset <= 1.0;
+        final isAtTop = offset <= widget.onScrollThreshold;
 
         if (isAtTop != this.isAtTop) {
           setState(() => this.isAtTop = isAtTop);
@@ -88,7 +92,7 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
         child: Stack(
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.only(top: height),
+              padding: EdgeInsets.only(top: !widget.expand ? height : 0.0),
               child: widget.body,
             ),
             buildAppBar(height),
@@ -107,7 +111,18 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
             widget.backgroundColor ?? theme.appBarTheme?.color ?? theme.accentColor;
         final colorOnScroll = widget.colorOnScroll ??
             backgroundColor.let((it) => it.isBright ? it.darken(0.1) : it.lighten(0.1));
-        final color = Color.lerp(backgroundColor, colorOnScroll, value);
+
+        final color = Color.lerp(
+          backgroundColor,
+          colorOnScroll,
+          value,
+        );
+
+        final elevation = lerpDouble(
+          widget.minElevation,
+          widget.maxElevation,
+          value,
+        );
 
         final brightness = () {
           if (widget.brightness != null) {
@@ -117,12 +132,15 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
           }
         }();
 
-        return SizedBox.fromSize(
-          size: Size.fromHeight(height),
+        return Box(
+          height: height,
+          color: color,
+          elevation: elevation,
+          shadowColor: widget.shadowColor,
           child: AppBar(
-            backgroundColor: color,
+            backgroundColor: Colors.transparent,
             brightness: brightness,
-            elevation: lerpDouble(widget.minElevation, widget.maxElevation, value),
+            elevation: 0.0,
             shadowColor: widget.shadowColor,
             actions: widget.actions,
             actionsIconTheme: widget.actionsIconTheme,

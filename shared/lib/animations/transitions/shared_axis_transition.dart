@@ -4,7 +4,7 @@
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide accelerateEasing, standardEasing, decelerateEasing;
 import 'package:flutter/widgets.dart';
 
 import 'utils.dart';
