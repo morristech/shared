@@ -268,6 +268,17 @@ class ThemeFactory {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
+
+      timePickerTheme: TimePickerThemeData(
+        helpTextStyle: TextStyle(
+          fontSize: 16,
+          color: schema.onSurfaceDark,
+          fontWeight: FontWeight.bold,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
     );
   }
 }
