@@ -1,10 +1,12 @@
 import 'package:get_it/get_it.dart';
 
-const Di di = Di();
+const Di di = Di._();
 
 class Di {
-  const Di();
+  const Di._();
   static const Di instance = di;
+
+  set allowReassignment(bool value) => GetIt.I.allowReassignment = value;
 
   /// Singleton.
   void put<T>(T dependency) => GetIt.I.registerSingleton<T>(dependency);

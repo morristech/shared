@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared/exceptions/exceptions.dart';
 
-export 'di.dart';
-
 abstract class Model extends ChangeNotifier {
   void notify([void optional]) {
     notifyListeners();
