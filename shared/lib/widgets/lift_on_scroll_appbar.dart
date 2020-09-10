@@ -32,7 +32,7 @@ class LiftOnScrollAppBar extends StatefulWidget {
     Key key,
     @required this.body,
     this.shadowColor,
-    this.maxElevation = 12.0,
+    this.maxElevation = 6.0,
     this.minElevation = 0.0,
     this.leading,
     this.automaticallyImplyLeading = true,
@@ -112,16 +112,18 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
         final colorOnScroll = widget.colorOnScroll ??
             backgroundColor.let((it) => it.isBright ? it.darken(0.1) : it.lighten(0.1));
 
+        final isTransparent = backgroundColor.opacity == 0.0;
+
         final color = Color.lerp(
           backgroundColor,
           colorOnScroll,
-          value,
+          isTransparent ? interval(0.0, 0.5, value) : value,
         );
 
         final elevation = lerpDouble(
           widget.minElevation,
           widget.maxElevation,
-          value,
+          isTransparent ? interval(0.5, 1.0, value) : value,
         );
 
         final brightness = () {
@@ -136,7 +138,7 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
           height: height,
           color: color,
           elevation: elevation,
-          shadowColor: widget.shadowColor,
+          shadowColor: widget.shadowColor ?? Colors.black.withOpacity(0.20),
           child: AppBar(
             backgroundColor: Colors.transparent,
             brightness: brightness,
