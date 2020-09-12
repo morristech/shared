@@ -211,16 +211,12 @@ class MyApp extends StatelessWidget {
       return I18nBuilder(
         languages: languages,
         builder: (context, language, loaded) {
-          if (!loaded) {
-            return splashScreen ?? Container();
-          }
-
           return buildApp(language?.locale, loaded);
         },
       );
+    } else {
+      return buildApp(null, true);
     }
-
-    return buildApp(null, true);
   }
 
   Widget buildApp(Locale locale, bool isLoaded) {
@@ -257,7 +253,11 @@ class MyApp extends StatelessWidget {
             builder: (context, child) => NoOverscroll(
               child: child,
             ),
-            home: isLoaded ? home : splashScreen,
+            home: isLoaded
+                ? home
+                : (useLocalizedBuilder
+                    ? splashScreen ?? Container()
+                    : splashScreen ?? home),
           ),
         );
       },

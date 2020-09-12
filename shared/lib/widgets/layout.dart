@@ -42,14 +42,16 @@ class LayoutConfiguration extends StatelessWidget {
   Widget build(BuildContext context) => child;
 }
 
+typedef _Builder = Widget Function(BuildContext _);
+
 class ConfigurationBuilder extends StatelessWidget {
   final LayoutPreferences preferences;
-  final Widget mobile;
-  final Widget mobileLandscape;
-  final Widget tablet;
-  final Widget tabletLandscape;
-  final Widget desktop;
-  final Widget desktopLandscape;
+  final _Builder mobile;
+  final _Builder mobileLandscape;
+  final _Builder tablet;
+  final _Builder tabletLandscape;
+  final _Builder desktop;
+  final _Builder desktopLandscape;
   final Widget Function(BuildContext context, bool isPortrait, DeviceType type, Size screenSize, Size size) builder;
   const ConfigurationBuilder({
     Key key,
@@ -90,28 +92,28 @@ class ConfigurationBuilder extends StatelessWidget {
 
         if (type == DeviceType.desktop) {
           if (isLandscape && desktopLandscape != null) {
-            return desktopLandscape;
+            return desktopLandscape(context);
           }
 
           if (desktop != null) {
-            return desktop;
+            return desktop(context);
           }
         }
 
         if (type == DeviceType.tablet || type == DeviceType.desktop) {
           if (isLandscape && tabletLandscape != null) {
-            return tabletLandscape;
+            return tabletLandscape(context);
           }
 
           if (tablet != null) {
-            return tablet;
+            return tablet(context);
           }
         }
 
         if (isLandscape && mobileLandscape != null) {
-          return mobileLandscape;
+          return mobileLandscape(context);
         } else {
-          return mobile;
+          return mobile(context);
         }
       },
     );
