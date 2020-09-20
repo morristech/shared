@@ -1,25 +1,35 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+
+import 'package:shared/shared.dart';
 
 enum DeviceType { mobile, tablet, desktop }
 
 class LayoutPreferences {
   final double tabletThreshold;
   final double desktopThreshold;
+  final double maxPageWidth;
   const LayoutPreferences({
+    double maxPageWidth,
     this.tabletThreshold = 600.0,
     this.desktopThreshold = 1200.0,
-  })  : assert(tabletThreshold != null),
+  })  : maxPageWidth = maxPageWidth ?? tabletThreshold,
+        assert(tabletThreshold != null),
         assert(desktopThreshold != null),
         assert(tabletThreshold < desktopThreshold);
 
   @override
-  String toString() => 'LayoutPreferences(tabletThreshold: $tabletThreshold, desktopThreshold: $desktopThreshold)';
+  String toString() =>
+      'LayoutPreferences(tabletThreshold: $tabletThreshold, desktopThreshold: $desktopThreshold)';
 
   @override
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is LayoutPreferences && o.tabletThreshold == tabletThreshold && o.desktopThreshold == desktopThreshold;
+    return o is LayoutPreferences &&
+        o.tabletThreshold == tabletThreshold &&
+        o.desktopThreshold == desktopThreshold;
   }
 
   @override
@@ -36,7 +46,8 @@ class LayoutConfiguration extends StatelessWidget {
   })  : assert(preferences != null),
         super(key: key);
 
-  static LayoutConfiguration of(BuildContext context) => context.findAncestorWidgetOfExactType<LayoutConfiguration>();
+  static LayoutPreferences of(BuildContext context) =>
+      context.findAncestorWidgetOfExactType<LayoutConfiguration>().preferences;
 
   @override
   Widget build(BuildContext context) => child;
@@ -52,7 +63,8 @@ class ConfigurationBuilder extends StatelessWidget {
   final _Builder tabletLandscape;
   final _Builder desktop;
   final _Builder desktopLandscape;
-  final Widget Function(BuildContext context, bool isPortrait, DeviceType type, Size screenSize, Size size) builder;
+  final Widget Function(BuildContext context, bool isPortrait, DeviceType type,
+      Size screenSize, Size size) builder;
   const ConfigurationBuilder({
     Key key,
     this.preferences,
@@ -68,7 +80,7 @@ class ConfigurationBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final preferences = this.preferences ?? LayoutConfiguration.of(context)?.preferences;
+    final preferences = this.preferences ?? LayoutConfiguration.of(context);
     assert(preferences != null, 'No LayoutPreferences found in the widget tree!');
 
     final mq = MediaQuery.of(context);
@@ -119,13 +131,79 @@ class ConfigurationBuilder extends StatelessWidget {
     );
   }
 
-  DeviceType getDeviceType(LayoutPreferences preferences, double width, Orientation orientation) {
+  DeviceType getDeviceType(
+      LayoutPreferences preferences, double width, Orientation orientation) {
     if (width >= preferences.desktopThreshold) {
       return DeviceType.desktop;
     } else if (width >= preferences.tabletThreshold) {
       return DeviceType.tablet;
     } else {
       return DeviceType.mobile;
+    }
+  }
+}
+
+class ConstrainedWidth extends StatelessWidget {
+  final Widget child;
+  final double maxWidth;
+  const ConstrainedWidth({
+    Key key,
+    @required this.child,
+    this.maxWidth,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final maxWidth = () {
+      if (this.maxWidth != null) {
+        return this.maxWidth;
+      } else if (context.isPortrait) {
+        return double.infinity;
+      } else {
+        return LayoutConfiguration.of(context)?.maxPageWidth ?? 600.0;
+      }
+    }();
+
+    return ConstrainedBox(
+      child: child,
+      constraints: BoxConstraints(
+        maxWidth: maxWidth,
+      ),
+    );
+  }
+}
+
+class ConstrainedScrollable extends StatelessWidget {
+  final double verticalInset;
+  final double maxWidth;
+  final Widget Function(EdgeInsets padding) builder;
+  const ConstrainedScrollable({
+    Key key,
+    this.verticalInset = 0.0,
+    this.maxWidth,
+    @required this.builder,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.isPortrait) {
+      return builder(
+        EdgeInsets.symmetric(vertical: verticalInset),
+      );
+    } else {
+      return SizeBuilder(
+        builder: (context, width, height) {
+          final maxWidth =
+              this.maxWidth ?? LayoutConfiguration.of(context)?.maxPageWidth ?? 600.0;
+
+          final padding = EdgeInsets.symmetric(
+            vertical: verticalInset,
+            horizontal: ((width - maxWidth) / 2.0).atLeast(0.0),
+          );
+
+          return builder(padding);
+        },
+      );
     }
   }
 }

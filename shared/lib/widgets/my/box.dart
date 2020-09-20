@@ -239,6 +239,7 @@ class ListBox extends StatelessWidget {
   final Widget subtitle;
   final dynamic leading;
   final dynamic trailing;
+  final double elevation;
   final EdgeInsetsGeometry padding;
   final bool reserveIconSpace;
   final VoidCallback onTap;
@@ -253,6 +254,7 @@ class ListBox extends StatelessWidget {
     this.subtitle,
     this.leading,
     this.trailing,
+    this.elevation = 0.0,
     this.padding,
     this.reserveIconSpace = false,
     this.onTap,
@@ -290,6 +292,7 @@ class ListBox extends StatelessWidget {
       duration: duration,
       color: color,
       onTap: onTap,
+      elevation: elevation,
       constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
       padding: padding ?? const EdgeInsets.all(16),
       borderRadius: borderRadius,

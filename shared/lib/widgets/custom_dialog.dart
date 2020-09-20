@@ -148,7 +148,7 @@ class CustomDialog extends StatelessWidget {
 
     Color buttonColor = (accent ?? theme.accentColor).withOpacity(1.0);
     final dialogBackgroundColor = theme.dialogTheme.backgroundColor;
-    if (dialogBackgroundColor.differenceTo(buttonColor) < 0.1) {
+    if ((dialogBackgroundColor.brightness - buttonColor.brightness).abs() < 0.1) {
       buttonColor = dialogBackgroundColor.toContrast();
     }
 

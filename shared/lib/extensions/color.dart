@@ -3,21 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 extension ColorExtensions on Color {
-  static HexColor hex(String hexCode) => HexColor(hexCode);
-
-  static Color random() => Color.fromRGBO(
-        Random().nextInt(255),
-        Random().nextInt(255),
-        Random().nextInt(255),
-        1.0,
-      );
-
   double get brightness => computeLuminance();
 
   bool get isBright => brightness > 0.75;
   bool get isDark => brightness < 0.25;
 
-  double differenceTo(Color other) => (brightness - other.brightness).abs();
+  Color get transparent => withAlpha(0);
 
   Color toContrast({
     Color onBright = Colors.black,
