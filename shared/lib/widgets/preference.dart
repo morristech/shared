@@ -22,7 +22,7 @@ class Preference extends StatefulWidget {
     this.dependentKey,
     this.disableWhenDependent,
     this.isEnabled = true,
-    this.reserveIconSpace = false,
+    this.reserveIconSpace,
     @required this.title,
     this.summary,
     this.leading,
@@ -113,8 +113,10 @@ class _PreferenceState extends State<Preference> {
       );
     }
 
-    final reserveIconSpace =
-        widget.reserveIconSpace || PreferenceGroup.of(context)?.reserveIconSpace == true;
+    final reserveIconSpace = widget.reserveIconSpace ??
+        PreferenceGroup.of(context)?.reserveIconSpace ??
+        PreferencePage.of(context)?.reserveIconSpace ??
+        false;
 
     final title = widget.title is String
         ? Text(
@@ -154,7 +156,7 @@ class _PreferenceState extends State<Preference> {
   }
 }
 
-abstract class _CheckableBasePreference extends StatefulWidget {
+class _CheckableBasePreference extends StatefulWidget {
   final bool isChecked;
   final String prefsKey;
   final bool defaultValue;
@@ -168,7 +170,7 @@ abstract class _CheckableBasePreference extends StatefulWidget {
   final dynamic summaryActive;
   final dynamic summaryInActive;
   final Widget leading;
-  final Widget trailing;
+  final Widget Function(bool value, void Function(bool) set) trailing;
   final EdgeInsets padding;
   final bool show;
   const _CheckableBasePreference({
@@ -182,19 +184,21 @@ abstract class _CheckableBasePreference extends StatefulWidget {
     this.dependentKey = '',
     this.disableWhenDependent,
     this.isEnabled = true,
-    this.reserveIconSpace = false,
+    this.reserveIconSpace ,
     this.title,
     this.summary,
     this.leading,
-    this.trailing,
+    @required this.trailing,
     this.padding,
     this.show,
   })  : assert(prefsKey == null || (prefsKey != null && defaultValue != null)),
         super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _CheckableBasePreferenceState();
 }
 
-abstract class _CheckableBasePreferenceState<P extends _CheckableBasePreference>
-    extends State<P> {
+class _CheckableBasePreferenceState<P extends _CheckableBasePreference> extends State<P> {
   StreamSubscription _sub;
   Preferences _prefs;
 
@@ -255,7 +259,7 @@ abstract class _CheckableBasePreferenceState<P extends _CheckableBasePreference>
       summary: getSummary(),
       leading: widget.leading,
       isEnabled: widget.isEnabled,
-      trailing: buildTrailing(),
+      trailing: widget.trailing(isChecked, setChecked),
       dependentKey: widget.dependentKey,
       reserveIconSpace: widget.reserveIconSpace,
       disableWhenDependent: widget.disableWhenDependent,
@@ -276,8 +280,6 @@ abstract class _CheckableBasePreferenceState<P extends _CheckableBasePreference>
     return widget.summary;
   }
 
-  Widget buildTrailing();
-
   @override
   void dispose() {
     _sub?.cancel();
@@ -286,14 +288,14 @@ abstract class _CheckableBasePreferenceState<P extends _CheckableBasePreference>
 }
 
 class SwitchPreference extends _CheckableBasePreference {
-  const SwitchPreference({
+  SwitchPreference({
     bool isChecked = false,
     String prefsKey,
     bool defaultValue,
     Key key,
     String dependentKey,
     bool isEnabled,
-    bool reserveIconSpace = false,
+    bool reserveIconSpace,
     @required dynamic title,
     dynamic summary,
     dynamic summaryActive,
@@ -320,30 +322,21 @@ class SwitchPreference extends _CheckableBasePreference {
           leading: leading,
           padding: padding,
           show: show,
+          trailing: (value, set) => Switch(
+            value: isChecked,
+            onChanged: (checked) => set(checked),
+          ),
         );
-
-  @override
-  _SwitchPreferenceState createState() => _SwitchPreferenceState();
-}
-
-class _SwitchPreferenceState<T> extends _CheckableBasePreferenceState<SwitchPreference> {
-  @override
-  Widget buildTrailing() {
-    return Switch(
-      value: isChecked,
-      onChanged: (checked) => setChecked(checked),
-    );
-  }
 }
 
 class CheckBoxPreference extends _CheckableBasePreference {
-  const CheckBoxPreference({
+  CheckBoxPreference({
     String prefsKey,
     bool defaultValue,
     Key key,
     String dependentKey,
     bool isEnabled,
-    bool reserveIconSpace = false,
+    bool reserveIconSpace ,
     @required dynamic title,
     dynamic summary,
     dynamic summaryActive,
@@ -369,21 +362,11 @@ class CheckBoxPreference extends _CheckableBasePreference {
           leading: leading,
           padding: padding,
           show: show,
+          trailing: (value, set) => Checkbox(
+            value: value,
+            onChanged: (checked) => set(checked),
+          ),
         );
-
-  @override
-  _CheckBoxPreferenceState createState() => _CheckBoxPreferenceState();
-}
-
-class _CheckBoxPreferenceState<T>
-    extends _CheckableBasePreferenceState<CheckBoxPreference> {
-  @override
-  Widget buildTrailing() {
-    return Checkbox(
-      value: isChecked,
-      onChanged: (checked) => setChecked(checked),
-    );
-  }
 }
 
 class PreferenceGroup extends StatelessWidget {
@@ -398,7 +381,7 @@ class PreferenceGroup extends StatelessWidget {
     @required this.children,
     this.style,
     this.isEnabled = true,
-    this.reserveIconSpace = false,
+    this.reserveIconSpace,
   }) : super(key: key);
 
   static PreferenceGroup of(BuildContext context) =>
@@ -408,6 +391,9 @@ class PreferenceGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+
+    final reserveIconSpace =
+        this.reserveIconSpace ?? PreferencePage.of(context)?.reserveIconSpace ?? false;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -443,5 +429,61 @@ class PreferenceGroup extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class PreferencePage extends StatefulWidget {
+  final bool reserveIconSpace;
+
+  /// Type is dynamic because usually you should hide
+  /// the implementation using dependency injection.
+  ///
+  /// If this is not of type [AppPreference], no listener
+  /// will be attached.
+  final dynamic prefs;
+
+  final WidgetBuilder builder;
+  const PreferencePage({
+    Key key,
+    this.reserveIconSpace = false,
+    @required this.prefs,
+    @required this.builder,
+  }) : super(key: key);
+
+  static PreferencePage of(BuildContext context) {
+    return context.findAncestorWidgetOfExactType<PreferencePage>();
+  }
+
+  @override
+  _PreferencePageState createState() => _PreferencePageState();
+}
+
+class _PreferencePageState extends State<PreferencePage> {
+  @override
+  void initState() {
+    super.initState();
+
+    whenAppPreferences((prefs) => prefs.addListener(_onPreferencesChanged));
+  }
+
+  void whenAppPreferences(void Function(AppPreferences prefs) callback) {
+    final prefs = widget.prefs;
+
+    if (prefs is AppPreferences) {
+      callback(prefs);
+    }
+  }
+
+  void _onPreferencesChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context);
+
+  @override
+  void dispose() {
+    whenAppPreferences((prefs) => prefs.removeListener(_onPreferencesChanged));
+    super.dispose();
   }
 }

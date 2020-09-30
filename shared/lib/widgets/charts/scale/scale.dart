@@ -15,6 +15,7 @@ class Scale extends ImplicitAnimation {
   final bool labelAbove;
   final bool indicatorOnTop;
   final bool spaceEvenly;
+  final bool placeEdgeLabelsBetweenEntries;
   final BorderRadius borderRadius;
   final EdgeInsets padding;
   final Widget indicator;
@@ -31,6 +32,7 @@ class Scale extends ImplicitAnimation {
     this.labelAbove = false,
     this.indicatorOnTop = true,
     this.spaceEvenly = false,
+    this.placeEdgeLabelsBetweenEntries = false,
     this.borderRadius = BorderRadius.zero,
     this.padding = EdgeInsets.zero,
     this.indicator,
@@ -117,12 +119,19 @@ class ScaleState extends ImplicitAnimationState<ScaleData, Scale> {
         ),
       );
 
-      Widget buildLabel(AlignmentGeometry alignment, String label) {
+      Widget buildLabel(
+        AlignmentGeometry alignment,
+        String label, {
+        double offset = 0.0,
+      }) {
         return Align(
           alignment: alignment,
-          child: Text(
-            label ?? '',
-            style: entry.labelStyle,
+          child: FractionalTranslation(
+            translation: Offset(offset, 0.0),
+            child: Text(
+              label ?? '',
+              style: entry.labelStyle,
+            ),
           ),
         );
       }
@@ -133,6 +142,7 @@ class ScaleState extends ImplicitAnimationState<ScaleData, Scale> {
           buildLabel(
             AlignmentDirectional.centerStart,
             entry.startLabel,
+            offset: widget.placeEdgeLabelsBetweenEntries && !isFirst ? -0.5 : 0.0,
           ),
           buildLabel(
             AlignmentDirectional.center,
@@ -141,6 +151,7 @@ class ScaleState extends ImplicitAnimationState<ScaleData, Scale> {
           buildLabel(
             AlignmentDirectional.centerEnd,
             entry.endLabel,
+            offset: widget.placeEdgeLabelsBetweenEntries && !isLast ? 0.5 : 0.0,
           ),
         ],
       );

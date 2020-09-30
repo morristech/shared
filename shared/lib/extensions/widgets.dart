@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared/theme/schema.dart';
 
 extension ListWidgetExtensions on Iterable<Widget> {
-  List<Widget> seperateWith(dynamic spacing) {
+  List<Widget> seperate([dynamic spacing = const Divider()]) {
     assert(spacing is Widget || spacing is num);
 
     final List<Widget> result = [];

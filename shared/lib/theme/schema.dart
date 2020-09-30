@@ -47,6 +47,6 @@ class Schema extends ColorScheme {
         );
 
   static Schema of(BuildContext context) {
-    return ThemeBuilder.currentTheme(context)?.schema;
+    return ThemeBuilder.theme(context)?.schema;
   }
 }

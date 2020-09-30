@@ -159,7 +159,7 @@ class _TranslaterEditPageState extends State<_TranslaterEditPage> {
             translation: translation,
           );
         })
-        .seperateWith(const Divider())
+        .seperate()
         .toList();
   }
 

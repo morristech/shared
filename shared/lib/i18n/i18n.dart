@@ -272,13 +272,13 @@ class I18n {
     _language = await _getPersistedLanguage();
     currentTranslations = await loadTranslations(_language);
     defaultTranslations = await loadTranslations(defaultLanguage);
-    initializeDateFormatting(language.code);
+    _updateIntl();
   }
 
   static void _updateIntl() {
     try {
-      Intl.defaultLocale = language.code;
       initializeDateFormatting(language.code);
+      Intl.defaultLocale = language.code;
     } catch (_) {}
   }
 

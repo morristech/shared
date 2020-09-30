@@ -5,15 +5,12 @@ import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'package:shared/shared.dart';
 
-const String THEME = 'THEME';
-const String THEME_MODE = 'THEME_MODE';
-const String DARK_THEME_KEY = 'DARK_THEME';
-const String LIGHT_THEME_KEY = 'LIGHT_THEME';
-
 /// A simple wrapper class around [StreamingSharedPreferences].
-class Preferences {
+class Preferences implements Listenable {
   final StreamingSharedPreferences instance;
-  const Preferences(this.instance) : assert(instance != null);
+  Preferences(this.instance) : assert(instance != null);
+
+  final List<VoidCallback> _listeners = [];
 
   int getInt(String key, [int defaultValue = 0]) {
     return instance.getInt(key, defaultValue: defaultValue).getValue();
@@ -31,45 +28,73 @@ class Preferences {
     return instance.getDouble(key, defaultValue: defaultValue).getValue();
   }
 
-  StreamSubscription<int> watchInt(String key, Function(int) onData,
-      {int defaultValue = 0}) {
+  StreamSubscription<int> watchInt(
+    String key,
+    Function(int) onData, {
+    int defaultValue = 0,
+  }) {
     return instance.getInt(key, defaultValue: defaultValue).listen(onData);
   }
 
-  StreamSubscription<bool> watchBool(String key, Function(bool) onData,
-      {bool defaultValue = false}) {
+  StreamSubscription<bool> watchBool(
+    String key,
+    Function(bool) onData, {
+    bool defaultValue = false,
+  }) {
     return instance.getBool(key, defaultValue: defaultValue).listen(onData);
   }
 
-  StreamSubscription<String> watchString(String key, Function(String) onData,
-      {String defaultValue = ''}) {
+  StreamSubscription<String> watchString(
+    String key,
+    Function(String) onData, {
+    String defaultValue = '',
+  }) {
     return instance.getString(key, defaultValue: defaultValue).listen(onData);
   }
 
-  StreamSubscription<double> watchDouble(String key, Function(double) onData,
-      {double defaultValue = 0.0}) {
+  StreamSubscription<double> watchDouble(
+    String key,
+    Function(double) onData, {
+    double defaultValue = 0.0,
+  }) {
     return instance.getDouble(key, defaultValue: defaultValue).listen(onData);
   }
 
   Future<bool> setInt(String key, int value) {
-    return instance.setInt(key, value);
+    return _emit(instance.setInt(key, value));
   }
 
   Future<bool> setBool(String key, bool value) {
-    return instance.setBool(key, value);
+    return _emit(instance.setBool(key, value));
   }
 
   Future<bool> setString(String key, String value) {
-    return instance.setString(key, value);
+    return _emit(instance.setString(key, value));
   }
 
   Future<bool> setDouble(String key, double value) {
-    return instance.setDouble(key, value);
+    return _emit(instance.setDouble(key, value));
   }
 
   Future<bool> remove(String key) {
-    return instance.remove(key);
+    return _emit(instance.remove(key));
   }
+
+  Future<bool> _emit(Future<bool> future) async {
+    final result = await future;
+
+    for (final listener in _listeners) {
+      listener();
+    }
+
+    return result;
+  }
+
+  @override
+  void addListener(VoidCallback listener) => _listeners.add(listener);
+
+  @override
+  void removeListener(VoidCallback listener) => _listeners.remove(listener);
 }
 
 /// The base class for all normal Prefs classes in an app with out of the box support
@@ -78,6 +103,11 @@ class AppPreferences extends Preferences {
   AppPreferences(
     StreamingSharedPreferences instance,
   ) : super(instance);
+
+  static const String themeKey = 'THEME';
+  static const String themeModeKey = 'THEME_MODE';
+  static const String darkThemeKey = 'DARK_THEME';
+  static const String lightThemeKey = 'LIGHT_THEME';
 
   AppTheme _defaultLight;
   AppTheme _defaultDark;
@@ -104,9 +134,9 @@ class AppPreferences extends Preferences {
 
   set theme(AppTheme theme) {
     if (theme.isLight) {
-      setString(LIGHT_THEME_KEY, theme.key);
+      setString(lightThemeKey, theme.key);
     } else {
-      setString(DARK_THEME_KEY, theme.key);
+      setString(darkThemeKey, theme.key);
     }
 
     if (themeMode != ThemeMode.system) {
@@ -115,14 +145,14 @@ class AppPreferences extends Preferences {
   }
 
   AppTheme get lightTheme {
-    final key = getString(LIGHT_THEME_KEY);
+    final key = getString(lightThemeKey);
     return key != '' && _themeMap?.containsKey(key) == true
         ? _themeMap[key]
         : _defaultLight;
   }
 
   AppTheme get darkTheme {
-    final key = getString(DARK_THEME_KEY);
+    final key = getString(darkThemeKey);
     return key != '' && _themeMap?.containsKey(key) == true
         ? _themeMap[key]
         : _defaultDark;
@@ -130,12 +160,12 @@ class AppPreferences extends Preferences {
 
   set themeMode(ThemeMode mode) {
     if (mode != null) {
-      setInt(THEME_MODE, mode.index);
+      setInt(themeModeKey, mode.index);
     }
   }
 
   ThemeMode get themeMode {
-    final index = getInt(THEME_MODE, -1);
+    final index = getInt(themeModeKey, -1);
     return ThemeMode.values.getOrElse(index, ThemeMode.system);
   }
 }
