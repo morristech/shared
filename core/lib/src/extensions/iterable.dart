@@ -1,4 +1,3 @@
-import '../constants/constants.dart';
 import '../utils/utils.dart';
 import 'num.dart';
 
@@ -79,33 +78,36 @@ extension IterableExtension<T> on Iterable<T> {
     return toList().sublist(start, (start + count).atMost(length));
   }
 
-  T getMax(num Function(T item) lambda) {
-    T value;
-    num max = minInt;
-    for (final item in this) {
-      final v = lambda(item);
-      if (v > max) {
-        value = item;
-        max = v;
+  Pair<T, T> getExtremas(Comparable Function(T item) comparator) {
+    T maxResult;
+    Comparable max;
+
+    T minResult;
+    Comparable min;
+
+    for (final element in this) {
+      final item = comparator(element);
+
+      max ??= item;
+      min ??= item;
+
+      maxResult ??= element;
+      minResult ??= element;
+
+      if (item.compareTo(max) > 0) {
+        max = item;
+        maxResult = element;
+      } else if (item.compareTo(min) < 0) {
+        min = item;
+        minResult = element;
       }
     }
 
-    return value;
+    return Pair(minResult, maxResult);
   }
 
-  T getMin(num Function(T item) lambda) {
-    T value;
-    num min = maxInt;
-    for (final item in this) {
-      final v = lambda(item);
-      if (v < min) {
-        value = item;
-        min = v;
-      }
-    }
-
-    return value;
-  }
+  T getMax(Comparable Function(T item) comparator) => getExtremas(comparator).second;
+  T getMin(Comparable Function(T item) comparator) => getExtremas(comparator).first;
 
   List<List<T>> groupBy<E>(E Function(T item) value) {
     final List<List<T>> result = [];
@@ -150,6 +152,10 @@ extension IterableExtension<T> on Iterable<T> {
 
     return result;
   }
+}
+
+extension My2DimensionIterableExtenions<T> on Iterable<Iterable<T>> {
+  List<T> flatten() => expand((iterable) => iterable).toList();
 }
 
 extension MyListExtension<T> on List<T> {

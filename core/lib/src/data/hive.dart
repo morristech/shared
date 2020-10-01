@@ -106,8 +106,12 @@ abstract class HiveDao<T extends DBModel> implements Dao<T> {
   }
 
   @override
-  Future<void> nuke() async {
+  Future<void> nuke([List<T> replacement]) async {
     await (await _box).deleteFromDisk();
     _openBox();
+
+    if (replacement != null) {
+      await addAll(replacement);
+    }
   }
 }

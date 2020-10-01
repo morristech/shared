@@ -3,6 +3,34 @@ import 'package:test/test.dart';
 import 'package:core/core.dart';
 
 void main() {
+  group('getExtremas', () {
+    const nums = [-1, 0, 1, 2, 3];
+    final dates = [DateTime(1970), DateTime(1990), DateTime(2010)];
+
+    test('Should return the min and max values from the given Iterable', () async {
+      // act
+      final numExtremas = nums.getExtremas((item) => item);
+      final dateExtremas = dates.getExtremas((item) => item);
+      // assert
+      expect(numExtremas.first, equals(-1));
+      expect(numExtremas.second, equals(3));
+      expect(dateExtremas.first, equals(DateTime(1970)));
+      expect(dateExtremas.second, equals(DateTime(2010)));
+    });
+
+    test('Should return the min value from the given iterable', () async {
+      // assert
+      expect(nums.getMin((item) => item), equals(-1));
+      expect(dates.getMin((item) => item), equals(DateTime(1970)));
+    });
+
+    test('Should return the max value from the given Iterable', () async {
+      // assert
+      expect(nums.getMax((item) => item), equals(3));
+      expect(dates.getMax((item) => item), equals(DateTime(2010)));
+    });
+  });
+
   group('sortBy', () {
     test('Should sort the list by multiple fields', () async {
       // arrange

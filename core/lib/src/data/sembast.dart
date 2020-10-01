@@ -7,12 +7,11 @@ import 'package:path/path.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
 
-
 import 'dao.dart';
 
-abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
+abstract class BaseSembastDao<T extends DBModel> implements Dao<T> {
   final String name;
-  RawSembastDao(this.name);
+  BaseSembastDao(this.name);
 
   DatabaseClient _trx;
 
@@ -47,6 +46,7 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
 
   Finder _getFinder(T item) {
     final finder = putFinder(item);
+
     if (finder == null) {
       return Finder(
         filter: Filter.byKey(item.key),
@@ -67,11 +67,7 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
   }
 
   @override
-  Future<void> addAll(List<T> items) {
-    return transaction(items, (trx, item) async {
-      await add(item);
-    });
-  }
+  Future<void> addAll(List<T> items) => transaction(items, add);
 
   @override
   Future<void> insert(int index, T item) async {
@@ -83,8 +79,7 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
         item,
       );
 
-    await nuke();
-    await addAll(newItems);
+    await nuke(newItems);
   }
 
   Future<void> insertAll(int index, List<T> items) async {
@@ -96,8 +91,7 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
         items,
       );
 
-    await nuke();
-    await addAll(newItems);
+    await nuke(newItems);
   }
 
   @override
@@ -110,11 +104,7 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
   }
 
   @override
-  Future<void> updateAll(List<T> items) {
-    return transaction(items, (trx, item) async {
-      await update(item);
-    });
-  }
+  Future<void> updateAll(List<T> items) => transaction(items, update);
 
   @override
   Future<void> delete(T item) async {
@@ -125,11 +115,7 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
   }
 
   @override
-  Future<void> deleteAll(List<T> items) {
-    return transaction(items, (trx, item) async {
-      await delete(item);
-    });
-  }
+  Future<void> deleteAll(List<T> items) => transaction(items, delete);
 
   @override
   Future<List<T>> get values async =>
@@ -143,28 +129,45 @@ abstract class RawSembastDao<T extends DBModel> implements Dao<T> {
         .map((snapshots) => mapSnapshots(snapshots));
   }
 
+  @override
+  Future<void> nuke([List<T> replacement = const []]) async {
+    return customTransaction((trx) async {
+      for (final item in await values) {
+        await delete(item);
+      }
+
+      for (final item in replacement) {
+        await add(item);
+      }
+    });
+  }
+
   Future<List<T>> find(Finder finder) async =>
       mapSnapshots(await store.find(await _db, finder: finder));
 
-  @override
-  Future<void> nuke() async => deleteAll(await values);
-
-  Future<void> transaction(List<T> items, Future Function(Transaction, T) action) async {
+  Future<void> transaction(List<T> items, Future Function(T item) action) async {
     if (items == null || items.isEmpty) return;
 
-    (await _db).transaction((trx) async {
-      _trx = trx;
+    return customTransaction((trx) async {
       for (final item in items) {
-        await action(trx, item);
+        await action(item);
       }
+    });
+  }
+
+  Future<void> customTransaction(
+      Future<void> Function(Transaction trx) transaction) async {
+    await (await _db).transaction((trx) async {
+      _trx = trx;
+
+      await transaction(trx);
     });
 
     _trx = null;
   }
 
   List<T> mapSnapshots(List<RecordSnapshot<int, Map<String, dynamic>>> snapshots) {
-    final items = snapshots.map((s) => fromMap(s.value)..key = s.key);
-    return List<T>.from(items);
+    return snapshots.map((s) => fromMap(s.value)..key = s.key).toList();
   }
 
   @override

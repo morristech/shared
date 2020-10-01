@@ -21,3 +21,9 @@ class Hours extends Duration {
 class Days extends Duration {
   const Days(int days) : super(days: days);
 }
+
+class DelegatingDateTime extends DateTime {
+  DelegatingDateTime(DateTime time)
+      : super(time.year, time.month, time.day, time.hour, time.minute, time.second,
+            time.millisecond, time.microsecond);
+}

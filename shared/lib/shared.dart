@@ -15,7 +15,7 @@ export 'theme/theme.dart';
 export 'utils/utils.dart';
 export 'widgets/widgets.dart';
 
-export 'package:core/core.dart';
+export 'package:core/core.dart' hide BaseSembastDao;
 export 'package:cube/cube.dart';
 export 'package:bloc/bloc.dart';
 export 'package:flutter_bloc/flutter_bloc.dart';

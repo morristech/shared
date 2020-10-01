@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:core/core.dart';
 
-abstract class SembastDao<T extends DBModel> extends RawSembastDao<T> {
+abstract class SembastDao<T extends DBModel> extends BaseSembastDao<T> {
   SembastDao(String name) : super(name);
 
   bool get useCacheDir => false;

@@ -19,5 +19,5 @@ abstract class Dao<T extends DBModel> {
   Future<List<T>> get values;
   Stream<List<T>> get stream;
 
-  Future<void> nuke();
+  Future<void> nuke([List<T> replacement]);
 }
