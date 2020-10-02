@@ -29,7 +29,6 @@ dependencies:
 
   # DBs
   shared_preferences: ^0.5.8
-  streaming_shared_preferences: ^1.0.1
   hive_flutter: ^0.3.1
 
 dev_dependencies:

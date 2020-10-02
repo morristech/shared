@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
 
 import 'package:shared/shared.dart';
 
-class Preference extends StatefulWidget {
+class Preference extends StatelessWidget {
   final String dependentKey;
   final bool Function(dynamic value) disableWhenDependent;
   final bool isEnabled;
@@ -33,69 +32,40 @@ class Preference extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _PreferenceState createState() => _PreferenceState();
-}
-
-class _PreferenceState extends State<Preference> {
-  Preferences _prefs;
-  StreamSubscription _sub;
-
-  bool _isDependetPreferenceEnabled = true;
-
-  @override
-  void initState() {
-    super.initState();
-    init();
-  }
-
-  Future<void> init() async {
-    _prefs ??= Preferences(await StreamingSharedPreferences.instance);
-
-    if (widget.dependentKey != null) {
-      _sub = _prefs.watchBool(
-        widget.dependentKey,
-        (data) {
-          setState(() {
-            _isDependetPreferenceEnabled =
-                widget?.disableWhenDependent?.call(data) == false;
-          });
-        },
-        defaultValue: false,
-      );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isEnabled = widget.dependentKey != null && _isDependetPreferenceEnabled != null
-        ? _isDependetPreferenceEnabled
-        : widget.isEnabled ?? true;
+    return _PreferenceKeyListenerBuilder(
+      defaultValue: true,
+      preferenceKey: dependentKey,
+      builder: (context, value) {
+        final isEnabled = (this.isEnabled ?? true) || value;
 
-    final preference = AnimatedOpacity(
-      opacity: isEnabled ? 1.0 : .5,
-      duration: const Millis(200),
-      child: IgnorePointer(
-        ignoring: !isEnabled,
-        child: buildPreference(),
-      ),
+        final preference = AnimatedOpacity(
+          opacity: isEnabled ? 1.0 : .5,
+          duration: const Millis(200),
+          child: IgnorePointer(
+            ignoring: !isEnabled,
+            child: buildPreference(context),
+          ),
+        );
+
+        if (show == null) {
+          return preference;
+        } else {
+          return AnimatedSizeFade(
+            show: show,
+            duration: const Millis(500),
+            child: preference,
+          );
+        }
+      },
     );
-
-    if (widget.show == null) {
-      return preference;
-    } else {
-      return AnimatedSizeFade(
-        show: widget.show,
-        duration: const Millis(500),
-        child: preference,
-      );
-    }
   }
 
-  Widget buildPreference() {
+  Widget buildPreference(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    Widget leading = widget.leading;
+    Widget leading = this.leading;
     if (leading is Icon) {
       leading = Container(
         width: 40,
@@ -104,7 +74,7 @@ class _PreferenceState extends State<Preference> {
       );
     }
 
-    Widget trailing = widget.trailing;
+    Widget trailing = this.trailing;
     if (trailing is Icon) {
       trailing = Container(
         width: 40,
@@ -113,26 +83,26 @@ class _PreferenceState extends State<Preference> {
       );
     }
 
-    final reserveIconSpace = widget.reserveIconSpace ??
+    final reserveIconSpace = this.reserveIconSpace ??
         PreferenceGroup.of(context)?.reserveIconSpace ??
         PreferencePage.of(context)?.reserveIconSpace ??
         false;
 
-    final title = widget.title is String
+    final title = this.title is String
         ? Text(
-            widget.title,
+            this.title,
             style: textTheme.subtitle1,
           )
-        : widget.title;
+        : this.title;
 
-    final summary = widget.summary is String
+    final summary = this.summary is String
         ? AnimatedSwitcherText(
-            widget.summary,
+            this.summary,
             duration: const Millis(350),
             curve: Curves.ease,
             style: textTheme.subtitle2,
           )
-        : widget.summary;
+        : this.summary;
 
     return AnimatedSizeChanges(
       duration: const Duration(milliseconds: 250),
@@ -143,20 +113,14 @@ class _PreferenceState extends State<Preference> {
         leading: leading,
         trailing: trailing,
         reserveIconSpace: reserveIconSpace,
-        onTap: widget.onTap,
-        padding: widget.padding ?? const EdgeInsets.all(16),
+        onTap: onTap,
+        padding: padding ?? const EdgeInsets.all(16),
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
 }
 
-class _CheckableBasePreference extends StatefulWidget {
+class _CheckableBasePreference extends StatelessWidget {
   final bool isChecked;
   final String prefsKey;
   final bool defaultValue;
@@ -184,7 +148,7 @@ class _CheckableBasePreference extends StatefulWidget {
     this.dependentKey = '',
     this.disableWhenDependent,
     this.isEnabled = true,
-    this.reserveIconSpace ,
+    this.reserveIconSpace,
     this.title,
     this.summary,
     this.leading,
@@ -194,96 +158,42 @@ class _CheckableBasePreference extends StatefulWidget {
   })  : assert(prefsKey == null || (prefsKey != null && defaultValue != null)),
         super(key: key);
 
-  @override
-  State<StatefulWidget> createState() => _CheckableBasePreferenceState();
-}
+  bool get hasKey => key != null;
 
-class _CheckableBasePreferenceState<P extends _CheckableBasePreference> extends State<P> {
-  StreamSubscription _sub;
-  Preferences _prefs;
-
-  bool value = false;
-  bool get isChecked => value ?? false;
-
-  bool get hasKey => widget.prefsKey != null;
-
-  @override
-  void initState() {
-    super.initState();
-
+  Future<void> setChecked(bool checked) async {
     if (hasKey) {
-      watchKey();
-    } else {
-      value = widget.isChecked;
-    }
-  }
-
-  @override
-  void didUpdateWidget(_CheckableBasePreference oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.prefsKey != widget.prefsKey) {
-      widget.prefsKey == null ? _sub?.cancel() : watchKey();
+      (await RxSharedPreferences.instance).setBool(prefsKey, checked);
     }
 
-    if (!hasKey) {
-      value = widget.isChecked;
-    }
-  }
-
-  Future<void> watchKey() async {
-    _prefs ??= Preferences(await StreamingSharedPreferences.instance);
-
-    _sub = _prefs.watchBool(
-      widget.prefsKey,
-      (v) => setState(() => value = v),
-      defaultValue: widget.defaultValue,
-    );
-  }
-
-  Future setChecked(bool checked) async {
-    if (hasKey) {
-      await _prefs.setBool(widget.prefsKey, checked);
-    }
-
-    widget.onChanged?.call(checked);
+    onChanged?.call(checked);
   }
 
   @override
   Widget build(BuildContext context) {
-    final padding = widget.padding ?? const EdgeInsets.all(16);
+    return _PreferenceKeyListenerBuilder(
+      preferenceKey: prefsKey,
+      defaultValue: defaultValue ?? isChecked,
+      builder: (context, isChecked) {
+        final padding = this.padding ?? const EdgeInsets.all(16);
+        final summary = (isChecked ? summaryActive : summaryInActive) ?? this.summary;
 
-    return Preference(
-      onTap: () => setChecked(!isChecked),
-      title: widget.title,
-      summary: getSummary(),
-      leading: widget.leading,
-      isEnabled: widget.isEnabled,
-      trailing: widget.trailing(isChecked, setChecked),
-      dependentKey: widget.dependentKey,
-      reserveIconSpace: widget.reserveIconSpace,
-      disableWhenDependent: widget.disableWhenDependent,
-      padding: getSummary() == null
-          ? EdgeInsets.fromLTRB(padding.left, 8, padding.right, 8)
-          : widget.padding,
-      show: widget.show,
+        return Preference(
+          onTap: () => setChecked(!isChecked),
+          title: title,
+          summary: summary,
+          leading: leading,
+          isEnabled: isEnabled,
+          trailing: trailing(isChecked, setChecked),
+          dependentKey: dependentKey,
+          reserveIconSpace: reserveIconSpace,
+          disableWhenDependent: disableWhenDependent,
+          padding: summary == null
+              ? padding.subtract(const EdgeInsets.only(top: 8, bottom: 8))
+              : padding,
+          show: show,
+        );
+      },
     );
-  }
-
-  dynamic getSummary() {
-    if (widget.summaryActive != null && isChecked) {
-      return widget.summaryActive;
-    } else if (widget.summaryInActive != null && !isChecked) {
-      return widget.summaryInActive;
-    }
-
-    return widget.summary;
-  }
-
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
   }
 }
 
@@ -336,7 +246,7 @@ class CheckBoxPreference extends _CheckableBasePreference {
     Key key,
     String dependentKey,
     bool isEnabled,
-    bool reserveIconSpace ,
+    bool reserveIconSpace,
     @required dynamic title,
     dynamic summary,
     dynamic summaryActive,
@@ -432,21 +342,12 @@ class PreferenceGroup extends StatelessWidget {
   }
 }
 
-class PreferencePage extends StatefulWidget {
+class PreferencePage extends StatelessWidget {
   final bool reserveIconSpace;
-
-  /// Type is dynamic because usually you should hide
-  /// the implementation using dependency injection.
-  ///
-  /// If this is not of type [AppPreference], no listener
-  /// will be attached.
-  final dynamic prefs;
-
   final WidgetBuilder builder;
   const PreferencePage({
     Key key,
     this.reserveIconSpace = false,
-    @required this.prefs,
     @required this.builder,
   }) : super(key: key);
 
@@ -455,35 +356,37 @@ class PreferencePage extends StatefulWidget {
   }
 
   @override
-  _PreferencePageState createState() => _PreferencePageState();
+  Widget build(BuildContext context) {
+    return FutureBuilder<RxSharedPreferences>(
+      future: RxSharedPreferences.instance,
+      builder: (context, snapshot) => StreamBuilder(
+        stream: snapshot?.data?.stream,
+        builder: (context, _) => builder(context),
+      ),
+    );
+  }
 }
 
-class _PreferencePageState extends State<PreferencePage> {
-  @override
-  void initState() {
-    super.initState();
-
-    whenAppPreferences((prefs) => prefs.addListener(_onPreferencesChanged));
-  }
-
-  void whenAppPreferences(void Function(AppPreferences prefs) callback) {
-    final prefs = widget.prefs;
-
-    if (prefs is AppPreferences) {
-      callback(prefs);
-    }
-  }
-
-  void _onPreferencesChanged() {
-    if (mounted) setState(() {});
-  }
+class _PreferenceKeyListenerBuilder extends StatelessWidget {
+  final String preferenceKey;
+  final bool defaultValue;
+  final Widget Function(BuildContext context, bool value) builder;
+  const _PreferenceKeyListenerBuilder({
+    Key key,
+    @required this.preferenceKey,
+    this.defaultValue = false,
+    @required this.builder,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => widget.builder(context);
-
-  @override
-  void dispose() {
-    whenAppPreferences((prefs) => prefs.removeListener(_onPreferencesChanged));
-    super.dispose();
+  Widget build(BuildContext context) {
+    return FutureBuilder<RxSharedPreferences>(
+      future: RxSharedPreferences.instance,
+      builder: (context, snapshot) => StreamBuilder(
+        initialData: defaultValue,
+        stream: preferenceKey != null ? snapshot?.data?.watchBool(preferenceKey) : null,
+        builder: (context, snapshot) => builder(context, snapshot.data ?? defaultValue),
+      ),
+    );
   }
 }

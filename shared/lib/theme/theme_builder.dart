@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared/shared.dart';
-import 'package:streaming_shared_preferences/streaming_shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppTheme {
   final String key;
@@ -67,7 +68,7 @@ class ThemeBuilder extends StatefulWidget {
 }
 
 class ThemeBuilderState extends State<ThemeBuilder> {
-  AppPreferences _prefs;
+  ThemePreferences _prefs;
 
   ThemeMode themeMode;
   AppTheme lightTheme;
@@ -82,53 +83,54 @@ class ThemeBuilderState extends State<ThemeBuilder> {
   @override
   void initState() {
     super.initState();
-    didUpdateWidget(widget);
     _observeThemeChanges();
   }
 
   @override
   void didUpdateWidget(ThemeBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _assignDefaultThemes();
-    _prefs?.themes = themes;
-  }
 
-  void _assignDefaultThemes() {
-    for (final theme in widget.themes) {
-      if (theme.isLight && (lightTheme == null || theme.key == lightTheme.key)) {
-        lightTheme = theme;
-      } else if (theme.isDark && (darkTheme == null || theme.key == darkTheme.key)) {
-        darkTheme = theme;
-      }
+    if (!listEquals(widget.themes, oldWidget.themes)) {
+      _cancelSubscriptions();
+      _observeThemeChanges();
     }
   }
 
   void _observeThemeChanges() async {
     if (Platform.isWindows || Platform.isLinux) return;
 
-    _prefs ??= AppPreferences(await StreamingSharedPreferences.instance);
-    _prefs.themes = themes;
+    _assignDefaultThemes();
 
-    _lightThemeSubscription = _prefs.watchString(AppPreferences.lightThemeKey, (theme) {
+    _prefs = await ThemePreferences.init(themes);
+
+    _lightThemeSubscription = _prefs.watchLightTheme().listen((theme) {
       if (_prefs.lightTheme != lightTheme) {
         lightTheme = _prefs.lightTheme;
         _themeChanged();
       }
     });
 
-    _darkThemeSubscription = _prefs.watchString(AppPreferences.darkThemeKey, (theme) {
+    _darkThemeSubscription = _prefs.watchDarkTheme().listen((theme) {
       if (_prefs.darkTheme != darkTheme) {
         darkTheme = _prefs.darkTheme;
         _themeChanged();
       }
     });
 
-    _themeModeSubscription = _prefs.watchInt(AppPreferences.themeModeKey, (mode) {
-      if (mode != -1 && themeMode?.index != mode) {
-        themeMode = _prefs.themeMode;
-        _themeChanged();
-      }
+    _themeModeSubscription = _prefs.watchThemeMode().listen((mode) {
+      themeMode = _prefs.themeMode;
+      _themeChanged();
     });
+  }
+
+  void _assignDefaultThemes() {
+    for (final theme in widget.themes) {
+      if (theme.isLight) {
+        lightTheme ??= theme;
+      } else {
+        darkTheme ??= theme;
+      }
+    }
   }
 
   AppTheme getTheme(BuildContext context) {
@@ -144,9 +146,7 @@ class ThemeBuilderState extends State<ThemeBuilder> {
 
   void _themeChanged() {
     if (widget.setUiOverlayStyle) {
-      OverlayChrome.setDefaultUiOverlayStyle(
-        getTheme(context).uiOverlayStyle,
-      );
+      SystemChrome.setSystemUIOverlayStyle(getTheme(context).uiOverlayStyle);
     }
 
     setState(() {});
@@ -162,11 +162,98 @@ class ThemeBuilderState extends State<ThemeBuilder> {
     );
   }
 
-  @override
-  void dispose() {
+  void _cancelSubscriptions() {
     _lightThemeSubscription?.cancel();
     _darkThemeSubscription?.cancel();
     _themeModeSubscription?.cancel();
+  }
+
+  @override
+  void dispose() {
+    _cancelSubscriptions();
     super.dispose();
   }
+}
+
+/// A wrapper class around [RxSharedPreferences] with build in
+/// theme persistence.
+///
+/// This allows the app to use and persist more than one light
+/// and/or dark themes.
+class ThemePreferences extends RxSharedPreferencesDelegate {
+  final AppTheme defaultLightTheme;
+  final AppTheme defaultDarkTheme;
+  final List<AppTheme> themes;
+  final Map<String, AppTheme> _themeMap;
+  ThemePreferences._(
+    RxSharedPreferences instance,
+    this.themes,
+    this.defaultLightTheme,
+    this.defaultDarkTheme,
+  )   : _themeMap = {for (final theme in themes) theme.key: theme},
+        super(instance);
+
+  static ThemePreferences instance;
+  static Future<ThemePreferences> init(List<AppTheme> themes) async {
+    assert(themes.isNotEmpty);
+
+    AppTheme defaultLightTheme;
+    AppTheme defaultDarkTheme;
+
+    for (final theme in themes) {
+      theme.isLight ? defaultLightTheme ??= theme : defaultDarkTheme ??= theme;
+    }
+
+    return instance = ThemePreferences._(
+      await RxSharedPreferences.instance,
+      themes,
+      defaultLightTheme,
+      defaultDarkTheme,
+    );
+  }
+
+  static const String _themeModeKey = 'THEME_MODE';
+  static const String _darkThemeKey = 'DARK_THEME';
+  static const String _lightThemeKey = 'LIGHT_THEME';
+
+  set theme(AppTheme theme) {
+    if (theme.isLight) {
+      setString(_lightThemeKey, theme.key);
+    } else {
+      setString(_darkThemeKey, theme.key);
+    }
+
+    if (themeMode != ThemeMode.system) {
+      themeMode = theme.isLight ? ThemeMode.light : ThemeMode.dark;
+    }
+  }
+
+  AppTheme get lightTheme {
+    final key = getString(_lightThemeKey, defaultLightTheme.key);
+    return _themeMap?.get(key) ?? defaultLightTheme;
+  }
+
+  Stream<AppTheme> watchLightTheme() =>
+      watchString(_lightThemeKey, defaultLightTheme?.key).map((_) => lightTheme);
+
+  AppTheme get darkTheme {
+    final key = getString(_darkThemeKey, defaultDarkTheme.key);
+    return _themeMap?.get(key) ?? defaultDarkTheme;
+  }
+
+  Stream<AppTheme> watchDarkTheme() =>
+      watchString(_darkThemeKey, defaultDarkTheme?.key).map((_) => darkTheme);
+
+  set themeMode(ThemeMode mode) {
+    if (mode != null) {
+      setInt(_themeModeKey, mode.index);
+    }
+  }
+
+  ThemeMode get themeMode {
+    final index = getInt(_themeModeKey, -1);
+    return ThemeMode.values.getOrElse(index, ThemeMode.system);
+  }
+
+  Stream<ThemeMode> watchThemeMode() => watchInt(_themeModeKey, -1).map((_) => themeMode);
 }

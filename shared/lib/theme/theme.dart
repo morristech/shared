@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-export 'overlay_chrome.dart';
 export 'schema.dart';
 export 'theme_builder.dart';
 export 'theme_factory.dart';
