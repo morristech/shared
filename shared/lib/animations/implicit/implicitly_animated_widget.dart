@@ -49,7 +49,7 @@ abstract class ImplicitAnimationState<T, W extends ImplicitAnimation> extends St
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     value = newValue;
     oldValue = newValue;
   }
@@ -92,7 +92,7 @@ abstract class ImplicitAnimationState<T, W extends ImplicitAnimation> extends St
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 }

@@ -9,6 +9,7 @@ import 'progress_bar_data.dart';
 
 part 'circular_progress_bar.dart';
 part 'horizontal_progress_bar.dart';
+part 'path_progress_bar.dart';
 
 abstract class _ProgressBar extends ImplicitAnimation {
   final double size;
@@ -45,23 +46,25 @@ abstract class _ProgressBar extends ImplicitAnimation {
         );
 }
 
-abstract class _ProgressBarState<W extends _ProgressBar> extends ImplicitAnimationState<ProgressBarData, W>
-    with TickerProviderStateMixin {
-  AnimationController _controller;
+abstract class _ProgressBarState<W extends _ProgressBar>
+    extends ImplicitAnimationState<ProgressBarData, W> with TickerProviderStateMixin {
+  AnimationController indeterminateController;
 
   Duration get indeterminateDuration => const Duration(milliseconds: 1800);
+
+  TextDirection get textDirection => Directionality.of(context);
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    indeterminateController = AnimationController(
       duration: indeterminateDuration,
       vsync: this,
     );
 
     if (widget.value == null) {
-      _controller.repeat();
+      indeterminateController.repeat();
     }
   }
 
@@ -69,10 +72,12 @@ abstract class _ProgressBarState<W extends _ProgressBar> extends ImplicitAnimati
   void didUpdateWidget(_ProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.value == null && !_controller.isAnimating) {
-      _controller.repeat();
-    } else if (widget.value != null && _controller.isAnimating) {
-      _controller.stop();
+    indeterminateController.duration = indeterminateDuration;
+
+    if (widget.value == null && !indeterminateController.isAnimating) {
+      indeterminateController.repeat();
+    } else if (widget.value != null && indeterminateController.isAnimating) {
+      indeterminateController.stop();
     }
   }
 
@@ -89,7 +94,8 @@ abstract class _ProgressBarState<W extends _ProgressBar> extends ImplicitAnimati
       elevation: widget.elevation,
       shadowColor: widget.shadowColor ?? widget.color ?? Colors.black26,
       strokeWidth: widget.strokeWidth,
-      backgroundColor: widget.backgroundColor ?? Theme.of(context).dividerColor,
+      backgroundColor:
+          widget.backgroundColor ?? widget.color?.transparent ?? Colors.transparent,
       backgroundStrokeWidth: widget.backgroundStrokeWidth,
     );
   }
@@ -97,32 +103,40 @@ abstract class _ProgressBarState<W extends _ProgressBar> extends ImplicitAnimati
   @nonVirtual
   @override
   Widget builder(BuildContext context, ProgressBarData data) {
-    return Semantics(
-      value: data.progress != null ? '${(data.progress * 100).round()} %' : null,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          return buildProgressBar(context, data, _controller.value);
-        },
+    return AnimatedBuilder(
+      animation: indeterminateController,
+      builder: (context, _) => Semantics(
+        value: data.progress != null ? '${(data.progress * 100).round()} %' : null,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return buildProgressBar(
+                context, constraints.biggest, data, indeterminateController.value);
+          },
+        ),
       ),
     );
   }
 
-  Widget buildProgressBar(BuildContext context, ProgressBarData data, double animationValue);
+  Widget buildProgressBar(
+    BuildContext context,
+    Size size,
+    ProgressBarData data,
+    double animationValue,
+  );
 
   @override
   void dispose() {
-    _controller.dispose();
+    indeterminateController.dispose();
     super.dispose();
   }
 }
 
 abstract class _ProgressBarPainter extends BasePainter {
   final ProgressBarData data;
-  final double animationValue;
+  final double value;
   _ProgressBarPainter(
     this.data,
-    this.animationValue,
+    this.value,
   );
 
   double get progress => data.progress;
@@ -136,6 +150,6 @@ abstract class _ProgressBarPainter extends BasePainter {
 
   @override
   bool shouldRepaint(_ProgressBarPainter oldDelegate) {
-    return oldDelegate.data != data || oldDelegate.animationValue != animationValue;
+    return oldDelegate.data != data || oldDelegate.value != value;
   }
 }

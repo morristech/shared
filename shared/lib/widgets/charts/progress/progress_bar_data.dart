@@ -61,40 +61,6 @@ class ProgressBarData {
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'progress': progress,
-      'strokeWidth': strokeWidth,
-      'size': size,
-      'backgroundStrokeWidth': backgroundStrokeWidth,
-      'elevation': elevation,
-      'color': color?.value,
-      'backgroundColor': backgroundColor?.value,
-      'shadowColor': shadowColor?.value,
-      'round': round,
-    };
-  }
-
-  static ProgressBarData fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
-    return ProgressBarData(
-      progress: map['progress'] ?? 0.0,
-      strokeWidth: map['strokeWidth'] ?? 0.0,
-      size: map['size'] ?? 0.0,
-      backgroundStrokeWidth: map['backgroundStrokeWidth'] ?? 0.0,
-      elevation: map['elevation'] ?? 0.0,
-      color: Color(map['color']),
-      backgroundColor: Color(map['backgroundColor']),
-      shadowColor: Color(map['shadowColor']),
-      round: map['round'] ?? false,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  static ProgressBarData fromJson(String source) => fromMap(json.decode(source));
-
   @override
   String toString() {
     return 'ProgressBarData(progress: $progress, strokeWidth: $strokeWidth, size: $size, backgroundStrokeWidth: $backgroundStrokeWidth, elevation: $elevation, color: $color, backgroundColor: $backgroundColor, shadowColor: $shadowColor, round: $round)';

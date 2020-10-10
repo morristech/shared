@@ -38,7 +38,12 @@ class HorizontalProgressBar extends _ProgressBar {
 
 class _HorizontalProgressBarState extends _ProgressBarState<HorizontalProgressBar> {
   @override
-  Widget buildProgressBar(BuildContext context, ProgressBarData data, double animationValue) {
+  Widget buildProgressBar(
+    BuildContext context,
+    Size size,
+    ProgressBarData data,
+    double animationValue,
+  ) {
     return AnimatedContainer(
       width: double.infinity,
       height: widget.strokeWidth,
@@ -111,11 +116,11 @@ class _HorizontalProgressPainter extends _ProgressBarPainter {
     if (progress != null) {
       drawBar(0.0, progress * width);
     } else {
-      final double x1 = width * line1Tail.transform(animationValue);
-      final double width1 = width * line1Head.transform(animationValue) - x1;
+      final double x1 = width * line1Tail.transform(value);
+      final double width1 = width * line1Head.transform(value) - x1;
 
-      final double x2 = width * line2Tail.transform(animationValue);
-      final double width2 = width * line2Head.transform(animationValue) - x2;
+      final double x2 = width * line2Tail.transform(value);
+      final double width2 = width * line2Head.transform(value) - x2;
 
       drawBar(x1, width1);
       drawBar(x2, width2);

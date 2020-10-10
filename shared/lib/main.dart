@@ -9,7 +9,7 @@ void main() async {
     Language.english,
     Language.german,
   ]);
-  
+
   runApp(MyApp());
 }
 
@@ -23,29 +23,14 @@ class MyApp extends StatelessWidget {
           title: Text('Material App Bar'),
         ),
         body: Center(
-          child: Builder(
-            builder: (context) => Column(
-              children: [
-                RaisedButton(
-                  child: Text('Settings'.i18n),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TranslaterPage(appName: 'Flux'),
-                    ),
-                  ),
-                  onLongPress: () {
-                    I18n.setLanguage(
-                      I18n.language == Language.english
-                          ? Language.german
-                          : Language.english,
-                    );
-                  },
-                ),
-                Text(
-                  DateTime(2020, 9, 12, 3, 49).yMMMMEEEEd(),
-                )
-              ],
+          child: RRectProgressBar(
+            running: false,
+            strokeWidth: 6.0,
+            borderRadius: BorderRadius.circular(50),
+            child: Container(
+              width: 200,
+              height: 100,
+              color: Colors.red,
             ),
           ),
         ),

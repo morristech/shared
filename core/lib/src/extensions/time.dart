@@ -1,4 +1,5 @@
-import 'package:duration/duration.dart' show DurationTersity, prettyDuration;
+import 'package:duration/duration.dart'
+    hide aMicrosecond, aMillisecond, aSecond, aMinute, anHour, aDay, aWeek;
 import 'package:duration/locale.dart';
 import 'package:intl/intl.dart';
 
@@ -11,7 +12,7 @@ DateTime get now => DateTime.now();
 DateTime get utc =>
     DateTime.fromMillisecondsSinceEpoch(now.millisecondsSinceEpoch, isUtc: true);
 
-extension DateTimeExtions on DateTime {
+extension MyDateTimeExtensions on DateTime {
   int get epoch => millisecondsSinceEpoch;
   int get unix => epoch ~/ 1000;
 
@@ -226,7 +227,7 @@ extension IntTimeExtensions on int {
   Duration get weeks => aWeek * this;
 }
 
-extension DurationExtensions on Duration {
+extension MyDurationExtensions on Duration {
   String format({
     bool abbreviated = true,
     String conjunction,
@@ -242,7 +243,6 @@ extension DurationExtensions on Duration {
       spacer: spacer,
       delimiter: delimiter,
       tersity: tersity,
-
       locale: DurationLocale.fromLanguageCode(Intl.defaultLocale),
     );
   }

@@ -56,7 +56,11 @@ class _CircularProgressBarState extends _ProgressBarState<CircularProgressBar> {
 
   @override
   Widget buildProgressBar(
-      BuildContext context, ProgressBarData data, double animationValue) {
+    BuildContext context,
+    Size size,
+    ProgressBarData data,
+    double animationValue,
+  ) {
     final rotationValue = _kRotationTween.transform(animationValue);
     final headValue = _kStrokeHeadTween.transform(animationValue);
     final tailValue = _kStrokeTailTween.transform(animationValue);
