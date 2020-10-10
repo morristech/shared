@@ -1,10 +1,11 @@
-// ignore_for_file: non_constant_identifier_names
-
+import 'package:duration/duration.dart' show DurationTersity, prettyDuration;
+import 'package:duration/locale.dart';
 import 'package:intl/intl.dart';
 
 import '../constants/constants.dart';
 import 'num.dart';
-import 'string.dart';
+
+// ignore_for_file: non_constant_identifier_names
 
 DateTime get now => DateTime.now();
 DateTime get utc =>
@@ -28,7 +29,9 @@ extension DateTimeExtions on DateTime {
   bool get isThisWeek => DateTime.now().weekId == weekId;
 
   bool isBetween(DateTime start, DateTime end) {
-    return isAtSameMomentAs(start) || isAtSameMomentAs(end) || (start.isBefore(this) && end.isAfter(this));
+    return isAtSameMomentAs(start) ||
+        isAtSameMomentAs(end) ||
+        (start.isBefore(this) && end.isAfter(this));
   }
 
   int get dayOfYear => difference(DateTime(year)).inDays;
@@ -223,46 +226,24 @@ extension IntTimeExtensions on int {
   Duration get weeks => aWeek * this;
 }
 
-class DurationFormatSpec {
-  final String pattern;
-  final DurationFormatStyle style;
-  const DurationFormatSpec({
-    this.pattern = 'dhms',
-    this.style = DurationFormatStyle.dhms,
-  });
-}
-
-enum DurationFormatStyle { ticker, dhms }
-
 extension DurationExtensions on Duration {
-  String format([DurationFormatSpec spec = const DurationFormatSpec()]) {
-    bool has(String string) => spec.pattern.contains(string);
+  String format({
+    bool abbreviated = true,
+    String conjunction,
+    String spacer,
+    String delimiter,
+    bool first = false,
+    DurationTersity tersity = DurationTersity.minute,
+  }) {
+    return prettyDuration(
+      this,
+      abbreviated: abbreviated,
+      conjunction: conjunction,
+      spacer: spacer,
+      delimiter: delimiter,
+      tersity: tersity,
 
-    final days = has('d') ? inDays : 0;
-    final hours = has('h') ? (this - Duration(days: days)).inHours : 0;
-    final minutes = has('m') ? (this - Duration(days: days, hours: hours)).inMinutes : 0;
-    final seconds = has('s')
-        ? (this - Duration(days: days, hours: hours, minutes: minutes)).inSeconds
-        : 0;
-
-    String result = '';
-    if (spec.style == DurationFormatStyle.ticker) {
-      String padZeros(value) => '$value:'.padLeft(2, '0');
-
-      if (days > 0) result += padZeros(days);
-      if (hours > 0) result += padZeros(hours);
-      result += padZeros(minutes) + padZeros(minutes);
-
-      result = result.removeSuffix(':');
-    } else {
-      if (days > 0) result += '${days}d ';
-      if (days > 0 || hours > 0) result += '${hours}h ';
-      if (days > 0 || hours > 0 || minutes > 0) result += '${minutes}m ';
-      if (seconds > 0 || has('s')) result += '${seconds}s';
-
-      result = result.removeSuffix(' ');
-    }
-
-    return result;
+      locale: DurationLocale.fromLanguageCode(Intl.defaultLocale),
+    );
   }
 }
