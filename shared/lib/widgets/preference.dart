@@ -170,12 +170,14 @@ class _CheckableBasePreference extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(isChecked);
     return _PreferenceKeyListenerBuilder(
       preferenceKey: prefsKey,
-      defaultValue: defaultValue ?? isChecked,
+      defaultValue: isChecked ?? defaultValue,
       builder: (context, isChecked) {
         final padding = this.padding ?? const EdgeInsets.all(16);
         final summary = (isChecked ? summaryActive : summaryInActive) ?? this.summary;
+        print(isChecked);
 
         return Preference(
           onTap: () => setChecked(!isChecked),
@@ -233,8 +235,8 @@ class SwitchPreference extends _CheckableBasePreference {
           padding: padding,
           show: show,
           trailing: (value, set) => Switch(
-            value: isChecked,
-            onChanged: (checked) => set(checked),
+            value: value,
+            onChanged: set,
           ),
         );
 }
@@ -380,13 +382,17 @@ class _PreferenceKeyListenerBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<RxSharedPreferences>(
-      future: RxSharedPreferences.instance,
-      builder: (context, snapshot) => StreamBuilder(
-        initialData: defaultValue,
-        stream: preferenceKey != null ? snapshot?.data?.watchBool(preferenceKey) : null,
-        builder: (context, snapshot) => builder(context, snapshot.data ?? defaultValue),
-      ),
-    );
+    if (preferenceKey == null) {
+      return builder(context, defaultValue);
+    } else {
+      return FutureBuilder<RxSharedPreferences>(
+        future: RxSharedPreferences.instance,
+        builder: (context, snapshot) => StreamBuilder(
+          initialData: defaultValue,
+          stream: preferenceKey != null ? snapshot?.data?.watchBool(preferenceKey) : null,
+          builder: (context, snapshot) => builder(context, snapshot.data ?? defaultValue),
+        ),
+      );
+    }
   }
 }

@@ -54,9 +54,7 @@ class _PathProgresBarState extends _ProgressBarState<RRectProgressBar> {
     lengthController = AnimationController(
       duration: indeterminateDuration,
       vsync: this,
-    )..addListener(() {
-        setState(() {});
-      });
+    );
 
     if (widget.running) {
       setInterval(0.125, 0.6);
@@ -74,14 +72,17 @@ class _PathProgresBarState extends _ProgressBarState<RRectProgressBar> {
 
     lengthController.duration = indeterminateDuration;
 
-    if (widget.running != oldWidget.running) {
-      if (widget.running) {
-        setInterval(0.125, 0.6);
-        lengthController.repeat(reverse: true);
-      } else {
-        setInterval(lengthController.value, 1.0);
-        lengthController.forward(from: 0.0);
-      }
+    if (widget.running) {
+      setInterval(0.125, 0.6);
+      lengthController.repeat(reverse: true);
+    } else {
+      setInterval(lengthController.value, 1.0);
+      () async {
+        await lengthController.forward(from: 0.0);
+        if (!widget.running) {
+          indeterminateController.stop();
+        }
+      }();
     }
   }
 
@@ -96,15 +97,20 @@ class _PathProgresBarState extends _ProgressBarState<RRectProgressBar> {
     ProgressBarData data,
     double animationValue,
   ) {
-    return CustomPaint(
-      child: widget.child,
-      foregroundPainter: _PathProgressPainter(
-        data,
-        animationValue,
-        textDirection,
-        lengthAnimation.value,
-        widget.borderRadius.resolve(textDirection),
-      ),
+    return AnimatedBuilder(
+      animation: lengthAnimation,
+      builder: (context, child) {
+        return CustomPaint(
+          child: widget.child,
+          foregroundPainter: _PathProgressPainter(
+            data,
+            animationValue,
+            textDirection,
+            lengthAnimation.value,
+            widget.borderRadius.resolve(textDirection),
+          ),
+        );
+      },
     );
   }
 

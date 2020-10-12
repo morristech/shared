@@ -103,15 +103,17 @@ abstract class _ProgressBarState<W extends _ProgressBar>
   @nonVirtual
   @override
   Widget builder(BuildContext context, ProgressBarData data) {
-    return AnimatedBuilder(
-      animation: indeterminateController,
-      builder: (context, _) => Semantics(
-        value: data.progress != null ? '${(data.progress * 100).round()} %' : null,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return buildProgressBar(
-                context, constraints.biggest, data, indeterminateController.value);
-          },
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: indeterminateController,
+        builder: (context, _) => Semantics(
+          value: data.progress != null ? '${(data.progress * 100).round()} %' : null,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return buildProgressBar(
+                  context, constraints.biggest, data, indeterminateController.value);
+            },
+          ),
         ),
       ),
     );

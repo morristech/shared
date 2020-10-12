@@ -11,7 +11,7 @@ class HorizontalProgressBar extends _ProgressBar {
     Color backgroundColor,
     Color shadowColor,
     double value,
-    double strokeWidth = 4.0,
+    double strokeWidth = 2.0,
     double backgroundStrokeWidth = 2.0,
     double elevation = 0.0,
     Duration duration = const Duration(milliseconds: 1000),
