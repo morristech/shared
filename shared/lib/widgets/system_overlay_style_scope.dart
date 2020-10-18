@@ -58,9 +58,9 @@ class SystemOverlayStyleScope extends StatelessWidget {
             systemNavigationBarColor: systemNavigationBarColor,
             systemNavigationBarDividerColor: systemNavigationBarDividerColor,
             systemNavigationBarIconBrightness: systemNavigationBarIconBrightness,
-            statusBarBrightness: statusBarBrightness,
             statusBarColor: statusBarColor,
-            statusBarIconBrightness: statusBarIconBrightness,
+            statusBarBrightness: statusBarBrightness,
+            statusBarIconBrightness: statusBarIconBrightness ?? statusBarBrightness,
           ),
     );
   }

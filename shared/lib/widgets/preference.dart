@@ -170,14 +170,12 @@ class _CheckableBasePreference extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(isChecked);
     return _PreferenceKeyListenerBuilder(
       preferenceKey: prefsKey,
       defaultValue: isChecked ?? defaultValue,
       builder: (context, isChecked) {
         final padding = this.padding ?? const EdgeInsets.all(16);
         final summary = (isChecked ? summaryActive : summaryInActive) ?? this.summary;
-        print(isChecked);
 
         return Preference(
           onTap: () => setChecked(!isChecked),
