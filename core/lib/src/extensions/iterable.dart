@@ -78,6 +78,7 @@ extension IterableExtension<T> on Iterable<T> {
     return toList().sublist(start, (start + count).atMost(length));
   }
 
+  /// Returns the min and max values as a Pair(min, max)
   Pair<T, T> getExtremas(Comparable Function(T item) comparator) {
     T maxResult;
     Comparable max;

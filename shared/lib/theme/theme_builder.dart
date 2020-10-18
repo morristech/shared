@@ -197,8 +197,7 @@ class ThemePreferences extends RxSharedPreferencesDelegate {
   static Future<ThemePreferences> init(List<AppTheme> themes) async {
     assert(themes.isNotEmpty);
 
-    AppTheme defaultLightTheme;
-    AppTheme defaultDarkTheme;
+    AppTheme defaultLightTheme, defaultDarkTheme;
 
     for (final theme in themes) {
       theme.isLight ? defaultLightTheme ??= theme : defaultDarkTheme ??= theme;

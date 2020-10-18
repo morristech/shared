@@ -41,7 +41,11 @@ abstract class RxPreferencesInterface {
 
 class RxSharedPreferences implements RxPreferencesInterface {
   final SharedPreferences sharedPreferences;
-  RxSharedPreferences._(this.sharedPreferences);
+  RxSharedPreferences._(this.sharedPreferences) {
+    _controller.onListen = () {
+      print('onListen');
+    };
+  }
 
   static RxSharedPreferences _instance;
   static Future<RxSharedPreferences> get instance async =>
@@ -177,16 +181,64 @@ class RxSharedPreferences implements RxPreferencesInterface {
       watchKey(key, defaultValue, _EnumAdapter(values));
 
   Stream<T> watchKey<T>(String key, T defaultValue, _PreferenceAdapter<T> adapter) {
-    final initialValue = getValue(key, defaultValue, adapter);
-
-    return stream
-        .where((event) => event.first == key)
-        .map((pair) => (pair.second as T) ?? defaultValue)
-        .also((_) => _yield(key, initialValue));
+    return stream.transform(
+      _RxPreferenceTransformer<T>(key, () => getValue(key, defaultValue, adapter)),
+    );
   }
 
   @override
   Future<bool> remove(String key) => sharedPreferences.remove(key);
+}
+
+class _RxPreferenceTransformer<T>
+    extends StreamTransformerBase<Pair<String, dynamic>, T> {
+  final String key;
+  final T Function() getValue;
+  _RxPreferenceTransformer(this.key, this.getValue);
+
+  @override
+  Stream<T> bind(Stream<Pair<String, dynamic>> stream) {
+    return StreamTransformer<Pair<String, dynamic>, T>((input, cancelOnError) {
+      StreamController<T> controller;
+      StreamSubscription<T> subscription;
+
+      controller = StreamController<T>(
+        sync: true,
+        onListen: () {
+          // When the stream is listened to, start with the current persisted
+          // value.
+          final value = getValue();
+          controller.add(value);
+
+          // Cache the last value. Caching is specific for each listener, so the
+          // cached value exists inside the onListen() callback for a reason.
+          T lastValue = value;
+
+          // Whenever a key has been updated, fetch the current persisted value
+          // and emit it.
+          subscription = input
+              .where((event) => event.first == key)
+              .map(
+                (_) => getValue(),
+              )
+              .listen(
+            (value) {
+              if (value != lastValue) {
+                controller.add(value);
+                lastValue = value;
+              }
+            },
+            onDone: () => controller.close(),
+          );
+        },
+        onPause: ([resumeSignal]) => subscription.pause(resumeSignal),
+        onResume: () => subscription.resume(),
+        onCancel: () => subscription.cancel(),
+      );
+
+      return controller.stream.listen(null);
+    }).bind(stream);
+  }
 }
 
 // * --- Adapters --- *
