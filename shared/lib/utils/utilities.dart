@@ -6,10 +6,6 @@ double lpToPx(BuildContext context, double px) {
   return MediaQuery.of(context).devicePixelRatio * px;
 }
 
-Future delayed(int millis, Function() func) {
-  return Future.delayed(Duration(milliseconds: millis), func);
-}
-
 void postFrame(VoidCallback callback) {
   assert(callback != null);
   WidgetsBinding.instance.addPostFrameCallback((_) => callback());

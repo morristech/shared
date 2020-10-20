@@ -16,6 +16,16 @@ extension MyDateTimeExtensions on DateTime {
   int get epoch => millisecondsSinceEpoch;
   int get unix => epoch ~/ 1000;
 
+  bool isBeforeOrAt(DateTime time) => isBefore(time) || isAtSameMomentAs(time);
+  bool isAfterOrAt(DateTime time) => isAfter(time) || isAtSameMomentAs(time);
+  bool isBetween(DateTime start, DateTime end) =>
+      isAtSameMomentAs(start) ||
+      isAtSameMomentAs(end) ||
+      (start.isBefore(this) && end.isAfter(this));
+
+  DateTime min(DateTime other) => isBefore(other) ? this : other;
+  DateTime max(DateTime other) => isAfter(other) ? this : other;
+
   String get hourId => '$year $month $day $hour';
   String get dateId => '$year $month $day';
   String get weekId => '$year $week';
@@ -28,12 +38,6 @@ extension MyDateTimeExtensions on DateTime {
   bool get isYesterday =>
       DateTime.now().subtract(const Duration(days: 1)).dateId == dateId;
   bool get isThisWeek => DateTime.now().weekId == weekId;
-
-  bool isBetween(DateTime start, DateTime end) {
-    return isAtSameMomentAs(start) ||
-        isAtSameMomentAs(end) ||
-        (start.isBefore(this) && end.isAfter(this));
-  }
 
   int get dayOfYear => difference(DateTime(year)).inDays;
   int get week {
@@ -49,6 +53,25 @@ extension MyDateTimeExtensions on DateTime {
 
   int get lengthOfMonth => endOfMonth.day;
   int get lengthOfYear => endOfYear.difference(startOfYear).inDays;
+
+  Duration get ellapsed => DateTime.now().difference(this);
+  Duration get ellapsedForMinute =>
+      Duration(seconds: second, milliseconds: millisecond, microseconds: microsecond);
+  Duration get ellapsedForHour => Duration(
+      minutes: minute,
+      seconds: second,
+      milliseconds: millisecond,
+      microseconds: microsecond);
+  Duration get ellapsedForDay => Duration(
+      hours: hour,
+      minutes: minute,
+      seconds: second,
+      milliseconds: millisecond,
+      microseconds: microsecond);
+
+  DateTime get minuteBegin => subtract(ellapsedForMinute);
+  DateTime get hourBegin => subtract(ellapsedForHour);
+  DateTime get midnight => subtract(ellapsedForDay);
 
   DateTime get startOfDay => DateTime(year, month, day);
   DateTime get endOfDay => DateTime(year, month, day, 23, 59, 59);

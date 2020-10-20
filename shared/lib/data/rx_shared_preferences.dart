@@ -41,11 +41,7 @@ abstract class RxPreferencesInterface {
 
 class RxSharedPreferences implements RxPreferencesInterface {
   final SharedPreferences sharedPreferences;
-  RxSharedPreferences._(this.sharedPreferences) {
-    _controller.onListen = () {
-      print('onListen');
-    };
-  }
+  RxSharedPreferences._(this.sharedPreferences);
 
   static RxSharedPreferences _instance;
   static Future<RxSharedPreferences> get instance async =>

@@ -22,9 +22,9 @@ extension IterableExtension<T> on Iterable<T> {
 
   int get lastIndex => length - 1;
 
-  List<E> mapWithIndex<E>(E Function(T item, int index) mapper) {
+  List<E> imap<E>(E Function(int i, T item) mapper) {
     var i = 0;
-    return map((e) => mapper(e, i++)).toList();
+    return map((e) => mapper(i++, e)).toList();
   }
 
   /// Counts the occurances of the given [predicate] or adds up

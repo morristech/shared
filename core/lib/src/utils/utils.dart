@@ -9,6 +9,8 @@ export 'time.dart';
 
 void unawaited(Future future) {}
 
+Future<void> delayed(Duration delay) => Future.delayed(delay);
+
 double random({double min = 0.0, double max = 1.0}) {
   final r = Random().nextDouble();
   return ((max - min) * r) + min;

@@ -145,7 +145,7 @@ class _TranslaterEditPageState extends State<_TranslaterEditPage> {
 
   List<Widget> buildFields() {
     return cube.translations
-        .mapWithIndex((translation, index) {
+        .imap((index, translation) {
           var node = nodes.getOrNull(index);
           final nextNode = nodes.getOrNull(index + 1);
           if (node == null) {
