@@ -19,6 +19,18 @@ class LayoutPreferences {
         assert(desktopThreshold != null),
         assert(tabletThreshold < desktopThreshold);
 
+  DeviceType getDeviceType(Size size) {
+    final width = size.shortestSide;
+    
+    if (width >= desktopThreshold) {
+      return DeviceType.desktop;
+    } else if (width >= tabletThreshold) {
+      return DeviceType.tablet;
+    } else {
+      return DeviceType.mobile;
+    }
+  }
+
   @override
   String toString() =>
       'LayoutPreferences(tabletThreshold: $tabletThreshold, desktopThreshold: $desktopThreshold)';
@@ -47,7 +59,7 @@ class LayoutConfiguration extends StatelessWidget {
         super(key: key);
 
   static LayoutPreferences of(BuildContext context) =>
-      context.findAncestorWidgetOfExactType<LayoutConfiguration>().preferences;
+      context.findAncestorWidgetOfExactType<LayoutConfiguration>()?.preferences;
 
   @override
   Widget build(BuildContext context) => child;
@@ -88,16 +100,9 @@ class ConfigurationBuilder extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        double width;
-        if (orientation == Orientation.landscape) {
-          width = mq.size.height;
-        } else {
-          width = mq.size.width;
-        }
-
         final isLandscape = orientation == Orientation.landscape;
 
-        final type = getDeviceType(preferences, width, orientation);
+        final type = preferences.getDeviceType(mq.size);
         if (builder != null) {
           return builder(context, !isLandscape, type, mq.size, constraints.biggest);
         }
@@ -129,17 +134,6 @@ class ConfigurationBuilder extends StatelessWidget {
         }
       },
     );
-  }
-
-  DeviceType getDeviceType(
-      LayoutPreferences preferences, double width, Orientation orientation) {
-    if (width >= preferences.desktopThreshold) {
-      return DeviceType.desktop;
-    } else if (width >= preferences.tabletThreshold) {
-      return DeviceType.tablet;
-    } else {
-      return DeviceType.mobile;
-    }
   }
 }
 
