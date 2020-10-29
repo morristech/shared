@@ -27,23 +27,25 @@ extension IterableExtension<T> on Iterable<T> {
     return map((e) => mapper(i++, e)).toList();
   }
 
-  /// Counts the occurances of the given [predicate] or adds up
-  /// the results returned by [predicate].
-  N count<N extends num>(dynamic Function(T item) predicate) {
-    num count = 0;
-    for (final item in this) {
-      final value = predicate.call(item);
-      if (value == null) continue;
+  /// Counts the occurances of the given [predicate].
+  int count(bool Function(T item) predicate) {
+    int count = 0;
 
-      assert(value is bool || value is num, value);
-      if (value is bool && value == true) {
+    for (final item in this) {
+      if (predicate(item) == true) {
         count++;
-      } else if (value is num) {
-        count += value;
       }
     }
 
-    return count as N;
+    return count;
+  }
+
+  double sumBy(num Function(T item) callback) {
+    double sum = 0.0;
+    for (final item in this) {
+      sum += callback(item);
+    }
+    return sum;
   }
 
   /// Returns a copy of this list.
@@ -218,10 +220,10 @@ extension MyListExtension<T> on List<T> {
 
   double avgOf(num Function(T item) value) {
     if (length == 0) return 0.0;
-    return count(value) / length;
+    return sumBy(value) / length;
   }
 }
 
 extension NumIterableX on Iterable<num> {
-  double get avg => count((v) => v) / length;
+  double get avg => sumBy((v) => v) / length;
 }

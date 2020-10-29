@@ -69,9 +69,9 @@ extension MyDateTimeExtensions on DateTime {
       milliseconds: millisecond,
       microseconds: microsecond);
 
-  DateTime get minuteBegin => subtract(ellapsedForMinute);
-  DateTime get hourBegin => subtract(ellapsedForHour);
-  DateTime get midnight => subtract(ellapsedForDay);
+  DateTime get floorToMinute => subtract(ellapsedForMinute);
+  DateTime get floorToHour => subtract(ellapsedForHour);
+  DateTime get floorToDay => subtract(ellapsedForDay);
 
   DateTime get startOfDay => DateTime(year, month, day);
   DateTime get endOfDay => DateTime(year, month, day, 23, 59, 59);

@@ -31,14 +31,34 @@ void main() {
     });
   });
 
+  group('count', () {
+    test('Should count the occurances of the given predicate', () async {
+      // arrange
+      final list = [Mock('Ben', 88), Mock('Ben', 12), Mock('Anna', 18)];
+      // act
+      // assert
+      expect(list.count((m) => m.name.startsWith('B')), equals(2));
+    });
+  });
+
+  group('sumBy', () {
+    test('Should sum the amounts over the given Iterable', () async {
+      // arrange
+      final list = [Mock('Ben', 5), Mock('Ben', 10), Mock('Anna', 15)];
+      // act
+      // assert
+      expect(list.sumBy((m) => m.age), equals(30));
+    });
+  });
+
   group('sortBy', () {
     test('Should sort the list by multiple fields', () async {
       // arrange
-      final list = [Dummy('Ben', 88), Dummy('Ben', 12), Dummy('Anna', 18)];
+      final list = [Mock('Ben', 88), Mock('Ben', 12), Mock('Anna', 18)];
       // act
       list.sortBy([(d) => d.name, (d) => d.age]);
       // assert
-      expect(list, equals([Dummy('Anna', 18), Dummy('Ben', 12), Dummy('Ben', 88)]));
+      expect(list, equals([Mock('Anna', 18), Mock('Ben', 12), Mock('Ben', 88)]));
     });
   });
 
@@ -52,21 +72,21 @@ void main() {
     test('Should create a new list from a list with only the elements that pass the test',
         () async {
       // arrange
-      final list = [Dummy('Newt', 10), Dummy('John', 20), Dummy('Newt', 30)];
+      final list = [Mock('Newt', 10), Mock('John', 20), Mock('Newt', 30)];
       // act
       final result = list.distinctBy(
         (result, item) => item.name != 'Newt' || !result.any((e) => e.name == 'Newt'),
       );
       // assert
-      expect(result, equals([Dummy('Newt', 10), Dummy('John', 20)]));
+      expect(result, equals([Mock('Newt', 10), Mock('John', 20)]));
     });
   });
 }
 
-class Dummy {
+class Mock {
   final String name;
   final int age;
-  Dummy(this.name, this.age);
+  Mock(this.name, this.age);
 
   @override
   String toString() => 'Dummy(name: $name, age: $age)';
@@ -75,7 +95,7 @@ class Dummy {
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is Dummy && o.name == name && o.age == age;
+    return o is Mock && o.name == name && o.age == age;
   }
 
   @override

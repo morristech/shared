@@ -75,8 +75,8 @@ class ScaleState extends ImplicitAnimationState<ScaleData, Scale> {
     final prevEntries = entries.filter((item) => !item.isIncoming);
     final length = lerpDouble(prevEntries.length, activeEntries.length, v);
 
-    final prevTotal = prevEntries.count((entry) => entry.value).toDouble();
-    final newTotal = activeEntries.count((entry) => entry.value).toDouble();
+    final prevTotal = prevEntries.sumBy((entry) => entry.value);
+    final newTotal = activeEntries.sumBy((entry) => entry.value);
     final total = lerpDouble(prevTotal, newTotal, v);
 
     return SizeBuilder(
@@ -107,7 +107,7 @@ class ScaleState extends ImplicitAnimationState<ScaleData, Scale> {
       final bar = Container(
         height: data.thickness,
         decoration: BoxDecoration(
-          color: entry.color.withOpacity(f),
+          color: entry.color.scaleOpacity(f),
           borderRadius: BorderRadius.only(
             topLeft: isFirst || hasSpacing ? data.borderRadius.topLeft : Radius.zero,
             bottomLeft:
