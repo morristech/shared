@@ -306,6 +306,7 @@ class _MaterialColorPickerState extends State<MaterialColorPicker> {
                       focusNode: node,
                       controller: hexController,
                       textInputAction: TextInputAction.done,
+                      textCapitalization: TextCapitalization.characters,
                       decoration: InputDecoration(
                         prefixText: '# ',
                         prefixStyle:

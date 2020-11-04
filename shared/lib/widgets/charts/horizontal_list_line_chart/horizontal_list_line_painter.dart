@@ -46,8 +46,6 @@ class HorizontaListLinePainer<T> extends BasePainter {
     super.paint(canvas, size);
     _calculateExtremas();
 
-    clip(Rect.fromLTRB(-20, 0, width + 20, height));
-
     for (final series in allSeries) {
       this.series = series;
 
@@ -193,7 +191,8 @@ class HorizontaListLinePainer<T> extends BasePainter {
     // The rect needs to be inflated so that there is
     // no visible gap between each of the elements on
     // low resolution devices.
-    drawRect(series.hasDivider ? drawingArea : Rect.fromLTRB(-2, 0, width + 2, height), paint);
+    drawRect(
+        series.hasDivider ? drawingArea : Rect.fromLTRB(-2, 0, width + 2, height), paint);
     canvas.restore();
   }
 
@@ -213,8 +212,10 @@ class HorizontaListLinePainer<T> extends BasePainter {
 
   void _drawDivider(double prevY, double nextY, Path path, Paint paint) {
     final hdt = series.dividerThickness;
-    final prevDivider = Rect.fromLTRB(-hdt, series.smoothFactor == 0.0 ? prevY : 0.0, hdt, height);
-    final nextDivider = Rect.fromLTRB(width - hdt, series.smoothFactor == 0.0 ? nextY : 0.0, width + hdt, height);
+    final prevDivider =
+        Rect.fromLTRB(-hdt, series.smoothFactor == 0.0 ? prevY : 0.0, hdt, height);
+    final nextDivider = Rect.fromLTRB(
+        width - hdt, series.smoothFactor == 0.0 ? nextY : 0.0, width + hdt, height);
 
     void draw(Rect divider) {
       drawLine(
@@ -266,7 +267,8 @@ class HorizontaListLinePainer<T> extends BasePainter {
 
   void _drawLabel(double y) {
     final value = series.data[index];
-    final label = series.labelBuilder?.call(value, index) ?? labelBuilder?.call(series, value, index);
+    final label = series.labelBuilder?.call(value, index) ??
+        labelBuilder?.call(series, value, index);
     if (label == null) return;
 
     final style = series.labelStyle;

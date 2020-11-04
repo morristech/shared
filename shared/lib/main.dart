@@ -22,18 +22,6 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: Text('Material App Bar'),
         ),
-        body: Center(
-          child: RRectProgressBar(
-            running: false,
-            strokeWidth: 6.0,
-            borderRadius: BorderRadius.circular(50),
-            child: Container(
-              width: 200,
-              height: 100,
-              color: Colors.red,
-            ),
-          ),
-        ),
       ),
     );
   }

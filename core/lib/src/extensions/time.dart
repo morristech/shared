@@ -108,6 +108,7 @@ extension MyDateTimeExtensions on DateTime {
 
   // * FORMATTER EXTENSIONS
   String format(String pattern, {String code}) {
+    code ??= Intl.defaultLocale;
     final dateFormat = code != null ? DateFormat(pattern, code) : DateFormat(pattern);
     return dateFormat.format(this);
   }

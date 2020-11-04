@@ -49,7 +49,7 @@ class TimerBuilder extends StatefulWidget {
   final WidgetBuilder builder;
   const TimerBuilder({
     Key key,
-    this.syncWithTime = false,
+    this.syncWithTime = true,
     this.period = const Seconds(1),
     @required this.builder,
   })  : assert(syncWithTime != null),

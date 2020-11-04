@@ -137,6 +137,7 @@ class _LiftOnScrollAppBarState extends State<LiftOnScrollAppBar> {
         return Box(
           height: height,
           color: color,
+          
           elevation: elevation,
           shadowColor: widget.shadowColor ?? Colors.black.withOpacity(0.20),
           child: AppBar(
